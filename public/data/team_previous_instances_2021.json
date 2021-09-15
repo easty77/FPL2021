@@ -1,0 +1,224 @@
+{
+   "data": [
+      {
+         "fixture_id": 41,
+         "m1": {
+            "a": 0,
+            "axg": 1.0,
+            "date": "2021-05-13",
+            "h": 0,
+            "hxg": 0.6
+         },
+         "r0": {
+            "date": "2022-01-22"
+         },
+         "r1": {
+            "a": 2,
+            "axg": 1.6,
+            "date": "2021-05-01",
+            "h": 1,
+            "hxg": 1.2
+         },
+         "team_a": 8,
+         "team_a_name": "Everton",
+         "team_h": 2,
+         "team_h_name": "Aston Villa"
+      },
+      {
+         "fixture_id": 42,
+         "m1": {
+            "a": 2,
+            "axg": 1.0,
+            "date": "2021-03-06",
+            "h": 1,
+            "hxg": 0.8
+         },
+         "r0": {
+            "date": "2022-01-22"
+         },
+         "r1": {
+            "a": 0,
+            "axg": 0.8,
+            "date": "2020-12-13",
+            "h": 3,
+            "hxg": 1.6
+         },
+         "team_a": 9,
+         "team_a_name": "Leicester",
+         "team_h": 4,
+         "team_h_name": "Brighton"
+      },
+      {
+         "fixture_id": 43,
+         "m1": {
+            "a": 1,
+            "axg": 2.5,
+            "date": "2021-03-06",
+            "h": 1,
+            "hxg": 1.1
+         },
+         "r0": {
+            "date": "2022-01-22"
+         },
+         "r1": {
+            "a": 1,
+            "axg": 0.8,
+            "date": "2020-12-13",
+            "h": 0,
+            "hxg": 1.9
+         },
+         "team_a": 1,
+         "team_a_name": "Arsenal",
+         "team_h": 5,
+         "team_h_name": "Burnley"
+      },
+      {
+         "fixture_id": 44,
+         "m1": {
+            "a": 0,
+            "axg": 0.8,
+            "date": "2021-05-23",
+            "h": 2,
+            "hxg": 2.2
+         },
+         "r0": {
+            "date": "2022-01-22"
+         },
+         "r1": {
+            "a": 7,
+            "axg": 2.9,
+            "date": "2020-12-19",
+            "h": 0,
+            "hxg": 0.5
+         },
+         "team_a": 7,
+         "team_a_name": "Crystal Palace",
+         "team_h": 11,
+         "team_h_name": "Liverpool"
+      },
+      {
+         "fixture_id": 45,
+         "m1": {
+            "a": 2,
+            "axg": 1.6,
+            "date": "2021-03-10",
+            "h": 5,
+            "hxg": 3.1
+         },
+         "r0": {
+            "date": "2022-01-22"
+         },
+         "r1": {
+            "a": 1,
+            "axg": 1.2,
+            "date": "2020-12-19",
+            "h": 0,
+            "hxg": 0.6
+         },
+         "team_a": 16,
+         "team_a_name": "Southampton",
+         "team_h": 12,
+         "team_h_name": "Man City"
+      },
+      {
+         "fixture_id": 46,
+         "m1": {
+            "a": 2,
+            "axg": 0.8,
+            "date": "2021-01-26",
+            "h": 1,
+            "hxg": 1.1
+         },
+         "r0": {
+            "date": "2022-01-22"
+         },
+         "r1": {
+            "a": 2,
+            "axg": 1.4,
+            "date": "2020-12-16",
+            "h": 5,
+            "hxg": 3.0
+         },
+         "team_a": 10,
+         "team_a_name": "Leeds",
+         "team_h": 14,
+         "team_h_name": "Newcastle"
+      },
+      {
+         "fixture_id": 47,
+         "m1": {
+         },
+         "r0": {
+            "date": "2022-01-22"
+         },
+         "r1": {
+         },
+         "team_a": 18,
+         "team_a_name": "Watford",
+         "team_h": 15,
+         "team_h_name": "Norwich"
+      },
+      {
+         "fixture_id": 48,
+         "m1": {
+            "a": 1,
+            "axg": 2.4,
+            "date": "2021-02-04",
+            "h": 0,
+            "hxg": 0.6
+         },
+         "r0": {
+            "date": "2022-01-22"
+         },
+         "r1": {
+            "a": 0,
+            "axg": 0.2,
+            "date": "2020-11-29",
+            "h": 0,
+            "hxg": 1.0
+         },
+         "team_a": 6,
+         "team_a_name": "Chelsea",
+         "team_h": 17,
+         "team_h_name": "Spurs"
+      },
+      {
+         "fixture_id": 49,
+         "m1": {
+            "a": 3,
+            "axg": 1.8,
+            "date": "2020-12-05",
+            "h": 1,
+            "hxg": 2.5
+         },
+         "r0": {
+            "date": "2022-01-22"
+         },
+         "r1": {
+            "a": 0,
+            "axg": 0.5,
+            "date": "2021-03-14",
+            "h": 1,
+            "hxg": 1.7
+         },
+         "team_a": 13,
+         "team_a_name": "Man Utd",
+         "team_h": 19,
+         "team_h_name": "West Ham"
+      },
+      {
+         "fixture_id": 50,
+         "m1": {
+         },
+         "r0": {
+            "date": "2022-01-22"
+         },
+         "r1": {
+         },
+         "team_a": 3,
+         "team_a_name": "Brentford",
+         "team_h": 20,
+         "team_h_name": "Wolves"
+      }
+   ]
+}
