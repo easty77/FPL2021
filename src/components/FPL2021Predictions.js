@@ -4,9 +4,6 @@ import {
   Table,
   TableHead,
   TableRow,
-  TableExpandRow,
-  TableExpandedRow,
-  TableExpandHeader,
   TableHeader,
   TableBody,
   TableCell,
@@ -15,63 +12,112 @@ import {
 } from 'carbon-components-react';
 
 
-const FPL2021Predictions = ({predictionsData, savePredictions, oddsData, saveOdds, retrieveURL}) => {
+const FPL2021Predictions = ({predictionsData, getProfit}) => {
 
-  const aColumns = [
-    { "key": "event", "header": "Event"},
-    { "key": "fixture_id", "header": "Fixture"},
-    { "key": "predictor_id", "header": "Predictor"},
-    { "key": "team_h_score", "header": "H"},
-    { "key": "team_a_score", "header": "A"},
-    { "key": "reason", "header": "Reason"},
-    { "key": "correct_score", "header": "Correct"},
-    { "key": "bonus_score", "header": "Bonus"},
-];
-const aOddsColumns = [
-    { "key": "fixture_id", "header": "Fixture"},
-    { "key": "dsp_home", "header": "Predictor"},
-    { "key": "dsp_away", "header": "H"},
-    { "key": "dsp_draw", "header": "A"}
+const aAggregatedColumns = [
+  { "key": "id", "header": "Event"},
+  { "key": "SE", "header": "SE"},
+  { "key": "PE", "header": "PE"},
+  { "key": "ME", "header": "ME"},
+  { "key": "TE", "header": "TE"},
+  { "key": "AP", "header": "AP"}
 ];
 
-const [headers, setHeaders] = useState([]);
-const [rows, setRows] = useState([]);
-const [numMatches, setNumMatches] = useState("0");
-const [matchType, setMatchType] = useState("total");
+const [aggregatedPredictionsData, setAggregatedPredictionsData] = useState(null);
+const [scoreType, setScoreType] = useState("points");
 
   useEffect(() => {
-    console.log('In predictions initialise');
-     // initialise
-    if (predictionsData === null) {
-    	loadPredictionsData();
-    }
-	},[]);
+      setAggregatedPredictionsData(getPredictionsData())
+	},[predictionsData]);
 
-  const loadPredictionsData = () => {
-    let urlRetrievePredictions = retrieveURL('predictions');
-    let urlRetrieveOdds = retrieveURL('odds');
-    Promise.all([
-      fetch(urlRetrievePredictions).then(response => response.json()),
-      fetch(urlRetrieveOdds).then(response => response.json())
-    ]).then(jsonData => {
-      let aPredictions = jsonData[0].rowdata;
-      let aOdds =  jsonData[1].rowdata; 
-      // unique id attribute (of type string) required for display in DataTable, so add
-      aPredictions.forEach((item, i) => {
-            item.id = (i + 1).toString();
-          });
-      aOdds.forEach((item, i) => {
-            item.id = (i + 1).toString();
-          });
-      savePredictions(aPredictions);
-      saveOdds(aOdds);
-    });
+  const handleScoreTypeChange = event => {
+    setScoreType(event.target.value);
   };
 
+
+  const createScoreRow = (id) => {
+    let empty =
+    {"id":id, 
+            "SE":{"correct":0, "points":0, "profit":{"value":0, "display":""}}, 
+            "PE":{"correct":0, "points":0, "profit":{"value":0, "display":""}}, 
+            "TE":{"correct":0, "points":0, "profit":{"value":0, "display":""}}, 
+            "ME":{"correct":0, "points":0, "profit":{"value":0, "display":""}}, 
+            "AP":{"correct":0, "points":0, "profit":{"value":0, "display":""}}
+          };
+    return empty;      
+  } 
+  const getPredictionsData = () => {
+    let m1 = predictionsData.reduce((prev, next) =>{
+      let event = next.event.toString()
+      if (!(event in prev)) {
+         prev[event] = createScoreRow(event)
+      }
+      // tested using XX
+      if (prev[event][next.predictor_id] !== undefined) {
+        prev[event][next.predictor_id].correct += next.correct_score 
+        prev[event][next.predictor_id].points += (3 * next.correct_score) + next.bonus_score
+        let profit_value = -1; 
+        if (next.correct_score == 1) {
+          let profit = getProfit(next.fixture_id)
+          profit_value = profit.value
+          if (prev[event][next.predictor_id].profit.display != "") {
+            prev[event][next.predictor_id].profit.display += ", "
+          }
+          prev[event][next.predictor_id].profit.display +=  profit.display 
+        }
+        prev[event][next.predictor_id].profit.value += profit_value
+      }
+       return prev;
+    }, {});
+
+    let aRows = Object.keys(m1).map(id => m1[id]);
+
+    // need to deep copy else 1st element is updated!
+    let m2 = JSON.parse(JSON.stringify(aRows)).reduce((prev, next) =>{
+      console.log(prev)
+      for (const a in next) {
+        if (a!=="id") {
+          if (prev[a] === undefined) {
+              prev[a] = next[a]
+              prev[a].profit.display = (next[a].profit.value  > 0) ? "Y" : "-"
+          }
+          else {
+            for (const b in next[a]) {
+              if (b === 'profit') {
+                prev[a][b].value += next[a][b].value
+                prev[a][b].display += (next[a][b].value  > 0) ? "Y" : "-"
+              }
+              else  
+                prev[a][b] += next[a][b]
+           }
+          }
+        }
+      }
+      return prev
+    }, {});
+    m2.id = "Total"
+    aRows.push(m2) 
+    return aRows;
+}
   return (
     <>
-    { oddsData !== null && 
-    <DataTable rows={oddsData} headers={aOddsColumns} isSortable keyField='fixture_id'>
+        <div className="bx--grid">
+            <div className="bx--row">
+              <div className="bx--col-lg-12">
+                <Select
+                  id="score_type"
+                  labelText="Type"
+                  value={scoreType}
+                  onChange={handleScoreTypeChange}>
+                  <SelectItem value="points" text="Points" />
+                  <SelectItem value="correct" text="#Correct" />
+                  <SelectItem value="profit" text="Profit" />
+                </Select>
+              </div>
+             </div>
+          </div>
+    { aggregatedPredictionsData !== null && 
+    <DataTable rows={aggregatedPredictionsData} headers={aAggregatedColumns}>
       {({ rows, headers, getHeaderProps, getRowProps, getTableProps }) => (
         <Table {...getTableProps()} size="compact">
           <TableHead>
@@ -81,18 +127,27 @@ const [matchType, setMatchType] = useState("total");
                   {header.header}
                 </TableHeader>
               ))}
-              <TableHeader />
             </TableRow>
           </TableHead>
           <TableBody>
             {rows.map(row => (
               <TableRow key={row.id.toString()} {...getRowProps({ row })}>
                 {row.cells.map(cell => {
+                  if (cell.info.header != 'id') {
+                    return (
+                      <TableCell key={cell.id}>
+                        {scoreType === "profit" && cell.value.profit.value != undefined ? 
+                        <div title={cell.value.profit.display}>{cell.value.profit.value.toFixed(2)}</div> 
+                        : cell.value[scoreType] }
+                      </TableCell>
+                    );
+                  }
+                  else
                     return <TableCell key={cell.id}>{cell.value}</TableCell>;
                 })}
               </TableRow>
             ))}
-          </TableBody>
+            </TableBody>
         </Table>
       )}
     </DataTable>

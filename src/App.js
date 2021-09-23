@@ -10,6 +10,8 @@ import {
 
 import FPL2021Championship from './components/FPL2021Championship'
 import FPL2021Predictions from './components/FPL2021Predictions'
+import FPL2021Home from './components/FPL2021Home'
+import FPL2021Input from './components/FPL2021Input'
 import FPL2021Header from './components/FPL2021Header'
 
 class DebugRouter extends BrowserRouter {
@@ -31,13 +33,13 @@ function App()
 {
   const urls = {
     mock: {
-      bootstrap: './FPL2021/data/bootstrap-static.json',
-      fixtures: './FPL2021/data/fixtures.json',
-      predictions: './FPL2021/data/predictions.json',
-      odds: './FPL2021/data/odds.json',
-      sequence: './FPL2021/data/team_results_sequence_2021.json',
-      previous: './FPL2021/data/team_previous_instances_2021.json',
-      team_stats:{"0":"./FPL2021/data/team_stats_2021.json", "3":"./FPL2021/data/team_last3_stats_2021.json"}
+      bootstrap: '/FPL2021/data/bootstrap-static.json',
+      fixtures: '/FPL2021/data/fixtures.json',
+      predictions: '/FPL2021/data/predictions.json',
+      odds: '/FPL2021/data/odds.json',
+      sequence: '/FPL2021/data/team_results_sequence_2021.json',
+      previous: '/FPL2021/data/team_previous_instances_2021.json',
+      team_stats:{"0":"/FPL2021/data/team_stats_2021.json", "3":"/FPL2021/data/team_last3_stats_2021.json"}
     },
     server: {
       bootstrap: '/fpl/json/2021/bootstrap-static.json',
@@ -50,11 +52,16 @@ function App()
     },
   };
   
-  const [bootstrapData, setBootstrapData] = useState(null);
+  const [weekNumber, setWeekNumber] = useState(5);
+  const [eventsData, setEventsData] = useState(null);
+  const [teamsData, setTeamsData] = useState(null);
   const [fixtureData, setFixtureData] = useState(null);
   const [teamStatsData, setTeamStatsData] = useState(null);
   const [predictionsData, setPredictionsData] = useState(null);
   const [oddsData, setOddsData] = useState(null);
+  const [previousInstanceData, setPreviousInstanceData] = useState(null);
+  const [resultsSequenceData, setResultsSequenceData] = useState(null);
+  const [staticDataLoaded, setStaticDataLoaded] = useState(false);
 
   const retrieveURL = urlName => {
     return urls[process.env.NODE_ENV === 'development' ? 'mock' : 'server'][
@@ -67,86 +74,145 @@ function App()
     loadBaseData();
 	},[]);
 
-  const renderPage=( props )=>{
-    const usePage = setSelectedPage( )
-    return renderMEAStudent( usePage, local, library )
-  }
-
-  const renderMEAStudent=( page, isLocal, current )=>{
-
-    console.log( "rendering page", page )
-
-    window.scrollTo( 0, 0 )
-
-    return (
-
-      fixtureData &&
-      <>
-        {
-          page === "championship" &&
-          <FPL2021Championship 	teamStatsData={teamStatsData}
-          saveTeamStats={setTeamStatsData}
-          retrieveURL = {retrieveURL} />
-        }
-        {
-          page === "predictions" &&
-          <FPL2021Predictions 	predictionsData={predictionsData} oddsData={oddsData}
-          savePredictions={setPredictionsData}
-          saveOdds={setOddsData}
-          retrieveURL = {retrieveURL} /> 
-        }
-      </>
-    )
-  }
-
-  const setSelectedPage =()=>{
-    let URLParams = new URLSearchParams( window.location.search )
-    const useAction = URLParams.get( 'action' )
-    const usePage = URLParams.get( 'content' )
-    let filtered = mastheadL1.navigationL1.filter( item => item.to ? item.to.indexOf( usePage ) !== -1 : false )
-    let newSelectedItem = filtered.length > 0 ? filtered[ 0 ].titleEnglish : null
-    console.log( "selectedPage: " + selectedItem + "-" + newSelectedItem )
-    if (useAction === 'student' && selectedItem !== newSelectedItem)
+  const getTeam=( id )=>{
+    return teamsData.find(t => t.id === id.toString())
+  }  
+  const getTeamStats=( id )=>{
+    return teamsData.find(t => t.id === id.toString())
+  }  
+  const getPreviousByFixture=( fixture_id )=>{
+    return previousInstanceData.find(f => f.fixture_id === fixture_id)
+  }  
+  const getSequenceByTeam=( team_id )=>{
+    return resultsSequenceData.find(s=> s.team_id === team_id)
+  }  
+  const getOddsByFixture=( fixture_id )=>{
+    return oddsData.find(o=> o.fixture_id === fixture_id)
+  }  
+  
+  const calculateFixtureProfit=( fixture_id )=>{
+    if (fixtureData === undefined)
     {
-      setSelectedItem( newSelectedItem )
+      console.log("fixtureData undefined")
+      return 0
     }
-    return usePage;
+    let fixture = fixtureData.find(f => f.id === fixture_id.toString())
+    if (fixture === undefined) {
+      console.log('Fixture not found: ' + fixture_id)
+      return 0.00
+    }
+    let odds_att = "draw"
+    if (fixture.team_h_score > fixture.team_a_score)
+      odds_att = "home"
+    else if (fixture.team_a_score > fixture.team_h_score)
+      odds_att = "away"
+
+    // subtract 1 as includes stake 
+    let odds = oddsData.find(o => o.fixture_id === fixture_id.toString())
+    let profit = {"value": parseFloat((odds[odds_att] - 1).toFixed(2)),
+              "display": odds["dsp_" + odds_att]};
+
+    return profit;
   }
+
   const loadBaseData = () => {
-    let urlRetrieveBootstrap = retrieveURL('bootstrap');
-    let urlRetrieveFixtures = retrieveURL('fixtures');
-    Promise.all([
-      fetch(urlRetrieveBootstrap).then(response => response.json()),
-      fetch(urlRetrieveFixtures).then(response => response.json())
-    ]).then(jsonData => {
-      setBootstrapData(jsonData[0].data);
-      setFixtureData(jsonData[1].data);
+    let aURLs=[]
+    let retrieveURLs = retrieveURL('team_stats');
+    aURLs.push(fetch(retrieveURL('bootstrap')).then(response => response.json()));
+    aURLs.push(fetch(retrieveURL('fixtures')).then(response => response.json()));
+    for (var u in retrieveURLs)
+    {
+        aURLs.push(fetch(retrieveURLs[u]).then(response => response.json()));
+    }
+    aURLs.push(fetch(retrieveURL('previous')).then(response => response.json()));
+    aURLs.push(fetch(retrieveURL('sequence')).then(response => response.json()));
+    aURLs.push(fetch(retrieveURL('odds')).then(response => response.json()));
+    aURLs.push(fetch(retrieveURL('predictions')).then(response => response.json()));
+    Promise.all(aURLs).then(jsonData => {
+      // unique id attribute (of type string) required for display in DataTable, so add
+      let aEvents = jsonData[0].events
+      aEvents.forEach((item, i) => {
+        item.id = item.id.toString();
+      });  
+      setEventsData(aEvents);
+      let aTeams = jsonData[0].teams
+      aTeams.forEach((item, i) => {
+        item.id = item.id.toString();
+      });  
+      setTeamsData(aTeams);
+      let aFixtures = jsonData[1];
+      aFixtures.forEach((item, i) => {
+            item.id = item.id.toString();
+          });  
+      setFixtureData(aFixtures);
+      let tSD = {};
+      let nIndex = 2;
+      for (var u in retrieveURLs) {
+          let aTeamStats= jsonData[nIndex++].data;
+          // id for dataTable row must be a string
+          aTeamStats.forEach(item => {
+              item.id = item.id.toString();
+          });
+          tSD[u] = aTeamStats
+      }
+      setTeamStatsData(tSD);
+      let aPrevious = jsonData[nIndex++].data
+      aPrevious.forEach(item=> {
+            item.id = item.fixture_id.toString();
+            item.fixture_id = item.fixture_id.toString();
+          });  
+      setPreviousInstanceData(aPrevious)
+      setResultsSequenceData(jsonData[nIndex++].data)
+     
+      let aOdds =  jsonData[nIndex++].rowdata; 
+      // unique id attribute (of type string) required for display in DataTable, so add
+      aOdds.forEach(item => {
+        item.id = item.fixture_id.toString();
+        item.fixture_id = item.fixture_id.toString();
+      });  
+       setOddsData(aOdds);
+       setPredictionsData(jsonData[nIndex++].rowdata);
+
+       setStaticDataLoaded(true)
+      console.log('events, teams & fixtures loaded')
     });
   };
 
     return (
     <div className="container">
-       {fixtureData !== null &&
-        <Content>
         <DebugRouter silent>
            <FPL2021Header />
+           { staticDataLoaded &&
+           <Content>
               <Switch>
                 <Route exact path="/FPL2021/predictions">
-                  <FPL2021Predictions 	predictionsData={predictionsData} oddsData={oddsData}
-                    savePredictions={setPredictionsData}
-                    saveOdds={setOddsData}
-                    retrieveURL = {retrieveURL} /> 
+                  <FPL2021Predictions 	predictionsData={predictionsData} 
+                    getProfit = {calculateFixtureProfit} /> 
                 </Route>
                 <Route exact path="/FPL2021/championship">
                   <FPL2021Championship 	teamStatsData={teamStatsData}
-                    saveTeamStats={setTeamStatsData}
-                    retrieveURL = {retrieveURL} />
+                    />
+                </Route>
+                <Route exact path="/FPL2021/input">
+                  <FPL2021Input 	fixtureData={fixtureData.filter(f => f.event === weekNumber)}
+                    getTeam={getTeam}
+                    getSequenceByTeam={getSequenceByTeam}
+                    getPreviousByFixture={getPreviousByFixture}
+                    getOddsByFixture={getOddsByFixture}
+                    />
+                </Route>
+                <Route path={["/", "/FPL2021"]}>
+                  <FPL2021Home 	predictionsData={predictionsData}
+                    fixtureData={fixtureData}
+                    getTeam={getTeam}
+                    getOddsByFixture={getOddsByFixture}
+                    /> 
                 </Route>
               </Switch>
+              </Content>
+            }
           </DebugRouter>
-        </Content>
-      }
-    </div>
+     </div>
     );
 }
 

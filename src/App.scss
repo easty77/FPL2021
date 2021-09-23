@@ -31,3 +31,57 @@
     transform: rotate(360deg);
   }
 }
+
+
+.result_H {background-color: beige !important;text-align:center; }
+.result_A {background-color: lightgrey !important;text-align:center;}
+.result_D {background-color: orange !important;text-align:center;}
+
+.points_0 {background-color: white !important;text-align:center;}
+.points_1 {background-color: pink !important;text-align:center;}
+.points_3 {background-color: cyan !important;text-align:center;}
+.points_4 {background-color: yellow !important;text-align:center;}
+.points_5 {background-color: greenyellow !important;text-align:center;}
+
+.subtable {
+  display: table;
+}
+.subtable .row {
+  display: table-row;
+}
+.subtable .header {
+  font-weight: bold;
+}
+.subtable .cell {
+  display: table-cell;
+  padding: 5px;
+}
+
+.subtable .odds_row {
+  display: table-row;
+  line-height: 10px; 
+}
+.subtable .odds {
+  display: table-cell;
+  padding: 5px;
+  text-align: center;
+}
+.subtable .versus {
+  display: table-cell;
+  padding: 5px;
+  text-align: center;
+}
+.subtable .entry_row {
+  display: table-row;
+  line-height: 15px; 
+}
+.subtable .data_row {
+  display: table-row;
+  line-height: 10px; 
+}
+.subtable .data_header_row {
+  display: table-row;
+  line-height: 8px; 
+  background-color: pink;
+  text-align: center;
+}

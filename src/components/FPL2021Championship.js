@@ -13,65 +13,10 @@ import {
   Select,
   SelectItem
 } from 'carbon-components-react';
-import {
-  convertGoing,
-  convertOrdinal,
-  formatWikipediaImage,
-} from '../Utils.js';
+import {getChampionshipColumns} from '../Utils.js';
 
-const FPL2021Championship = ({teamStatsData, saveTeamStats, retrieveURL}) => {
+const FPL2021Championship = ({teamStatsData}) => {
 
-  const aColumns = [
-    { "key": "name", "header": "Name", "type": "TEXT"},
-    { "key": "total_matches", "header": "#Matches", "type": "INT"},
-    { "key": "total_points", "header": "#Pts", "type": "INT"},
-    { "key": "total_xpts", "header": "#xPts", "type": "DECIMAL"},
-    { "key": "total_goals", "header": "#F", "type": "INT"},
-    { "key": "total_goals_conceded", "header": "#A", "type": "INT"},
-    { "key": "total_xg", "header": "#xF", "type": "DECIMAL"},
-    { "key": "total_vxg", "header": "#xA", "type": "DECIMAL"},
-    { "key": "total_shots", "header": "#Shots", "type": "INT"},
-    { "key": "total_target", "header": "#On Target", "type": "INT"},
-    { "key": "total_deep", "header": "#Deep", "type": "INT"},
-    { "key": "total_ppda", "header": "#PPDA", "type": "DECIMAL"},
-    { "key": "total_vshots", "header": "#Opponent Shots", "type": "INT"},
-    { "key": "total_vtarget", "header": "#Opponent On Target", "type": "INT"},
-    { "key": "total_vdeep", "header": "#Opponent Deep", "type": "INT"},
-    { "key": "total_vppda", "header": "#Opponent PPDA", "type": "DECIMAL"},
-    { "key": "total_possession", "header": "Possession", "type": "DECIMAL"},
-    { "key": "h_matches", "header": "#Matches", "type": "INT"},
-    { "key": "h_points", "header": "#Pts", "type": "INT"},
-    { "key": "h_xpts", "header": "#xPts", "type": "DECIMAL"},
-    { "key": "h_goals", "header": "#F", "type": "INT"},
-    { "key": "h_goals_conceded", "header": "#A", "type": "INT"},
-    { "key": "h_xg", "header": "#xF", "type": "DECIMAL"},
-    { "key": "h_vxg", "header": "#xA", "type": "DECIMAL"},
-    { "key": "h_shots", "header": "#Shots", "type": "INT"},
-    { "key": "h_target", "header": "#On Target", "type": "INT"},
-    { "key": "h_deep", "header": "#Deep", "type": "INT"},
-    { "key": "h_ppda", "header": "#PPDA", "type": "DECIMAL"},
-    { "key": "h_vshots", "header": "#Opponent Shots", "type": "INT"},
-    { "key": "h_vtarget", "header": "#Opponent On Target", "type": "INT"},
-    { "key": "h_vdeep", "header": "#Opponent Deep", "type": "INT"},
-    { "key": "h_vppda", "header": "#Opponent PPDA", "type": "DECIMAL"},
-    { "key": "h_possession", "header": "Possession", "type": "DECIMAL"},
-    { "key": "a_matches", "header": "#Matches", "type": "INT"},
-    { "key": "a_points", "header": "#Pts", "type": "INT"},
-    { "key": "a_xpts", "header": "#xG Pts", "type": "DECIMAL"},
-    { "key": "a_goals", "header": "#F", "type": "INT"},
-    { "key": "a_goals_conceded", "header": "#A", "type": "INT"},
-    { "key": "a_xg", "header": "#xF", "type": "DECIMAL"},
-    { "key": "a_vxg", "header": "#xA", "type": "DECIMAL"},
-    { "key": "a_shots", "header": "#Shots", "type": "INT"},
-    { "key": "a_target", "header": "#On Target", "type": "INT"},
-    { "key": "a_deep", "header": "#Deep", "type": "INT"},
-    { "key": "a_ppda", "header": "#PPDA", "type": "DECIMAL"},
-    { "key": "a_vshots", "header": "#Opponent Shots", "type": "INT"},
-    { "key": "a_vtarget", "header": "#Opponent On Target", "type": "INT"},
-    { "key": "a_vdeep", "header": "#Opponent Deep", "type": "INT"},
-    { "key": "a_vppda", "header": "#Opponent PPDA", "type": "DECIMAL"},
-    { "key": "a_possession", "header": "Possession", "type": "DECIMAL"}
-];
 
 const [headers, setHeaders] = useState([]);
 const [rows, setRows] = useState([]);
@@ -79,21 +24,9 @@ const [numMatches, setNumMatches] = useState("0");
 const [matchType, setMatchType] = useState("total");
 
   useEffect(() => {
-    console.log('In initialise');
-    console.log(teamStatsData);
-    // initialise
-    if (teamStatsData === null) {
-    	loadTeamStatsData();
-    }
-	},[]);
-
-  useEffect(() => {
-    console.log('In change: ' + numMatches + "-" + matchType);
-    if (teamStatsData !== null) {
-      setRows(teamStatsData[numMatches])
-      setHeaders(filterColumns())
-    }
-	},[numMatches,matchType]);
+    setRows(teamStatsData[numMatches])
+    setHeaders(filterColumns())
+	},[teamStatsData, numMatches,matchType]);
 
   const loadTeamStatsData = () => {
     let retrieveURLs = retrieveURL('team_stats');
@@ -103,24 +36,24 @@ const [matchType, setMatchType] = useState("total");
   		aURLs.push(fetch(retrieveURLs[u]).then(response => response.json()));
   	}
     Promise.all(aURLs).then(jsonData => {
-    	let teamStatsData = {};
+    	let tSD = {};
     	let nIndex = 0;
-	  	for (var u in retrieveURLs)
-	  	{
+	  	for (var u in retrieveURLs) {
       	let aTeamStats= jsonData[nIndex++].data;
         // id for dataTable row must be a string
         aTeamStats.forEach(item => {
           item.id = item.id.toString();
         });
-        teamStatsData[u] = aTeamStats
-    }
-      saveTeamStats(teamStatsData);
-      setRows(teamStatsData[numMatches])
+        tSD[u] = aTeamStats
+      }
+      saveTeamStats(tSD);
+      setRows(tSD[numMatches])
       setHeaders(filterColumns())
     });
   };
   const filterColumns = () => {
     let aFilterColumns = []
+    let aColumns = getChampionshipColumns()
     aColumns.forEach(column => {
       if (column.key === "name" ||  column.key.indexOf(matchType + "_") === 0)
         aFilterColumns.push(column)
@@ -172,7 +105,6 @@ const [matchType, setMatchType] = useState("total");
                   {header.header}
                 </TableHeader>
               ))}
-              <TableHeader />
             </TableRow>
           </TableHead>
           <TableBody>
