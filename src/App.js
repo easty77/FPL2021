@@ -39,7 +39,8 @@ function App()
       odds: '/FPL2021/data/odds.json',
       sequence: '/FPL2021/data/team_results_sequence_2021.json',
       previous: '/FPL2021/data/team_previous_instances_2021.json',
-      team_stats:{"0":"/FPL2021/data/team_stats_2021.json", "3":"/FPL2021/data/team_last3_stats_2021.json"}
+      team_stats:{"0":"/FPL2021/data/team_stats_2021.json", "3":"/FPL2021/data/team_last3_stats_2021.json"},
+      save_predictions:'/FPL2021/data/success.json'
     },
     server: {
       bootstrap: '/fpl/json/2021/bootstrap-static.json',
@@ -48,11 +49,13 @@ function App()
       odds: '/FPL/servlet/ENEFPLServlet?action=select_matchodds&output=json&year=2021',
       sequence: '/fpl/json/2021/team_results_sequence_2021.json',
       previous: '/fpl/json/2021/team_previous_instances_2021.json',
-      team_stats:{"0":"/json/fpl/team_stats_2021.json", "3":"/json/fpl/team_last3_stats_2021.json"}
+      team_stats:{"0":"/json/fpl/team_stats_2021.json", "3":"/json/fpl/team_last3_stats_2021.json"},
+      save_predictions:'/FPL/servlet/ENEFPLServlet?action=save_predictions&output=json&year=2021'
     },
   };
   
-  const [weekNumber, setWeekNumber] = useState(5);
+  const [predictorId, setPredictorId] = useState("SE");
+  const [weekNumber, setWeekNumber] = useState(6);
   const [eventsData, setEventsData] = useState(null);
   const [teamsData, setTeamsData] = useState(null);
   const [fixtureData, setFixtureData] = useState(null);
@@ -88,6 +91,45 @@ function App()
   }  
   const getOddsByFixture=( fixture_id )=>{
     return oddsData.find(o=> o.fixture_id === fixture_id)
+  } 
+  const callSubmitPredictions=(aPredictions)=>{
+    if (process.env.NODE_ENV === 'development') {
+      return fetch(retrieveURL('save_predictions'))
+    }
+    else {
+      return fetch(retrieveURL('save_predictions'), {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(aPredictions)
+      })
+    }  
+  } 
+  const submitPredictions=( predictionsObj )=>{
+    console.log(predictionsObj)
+    let aPredictions = []
+    for (let p in predictionsObj) {
+      aPredictions.push(predictionsObj[p])
+    }
+    return callSubmitPredictions(aPredictions).then(res => res.json())
+    .then(res => {
+      if (res.code === "0") {
+        fetch(retrieveURL('predictions')).then(response => response.json())
+        .then(jsonData => {
+          let aPredictions = jsonData.rowdata
+          aPredictions.forEach(item => {
+           item.fixture_id = item.fixture_id.toString();
+          });  
+          setPredictionsData(aPredictions)
+        })
+      }
+      else {
+        alert('Error')
+      }
+    }
+    );
   }  
   
   const calculateFixtureProfit=( fixture_id )=>{
@@ -171,7 +213,11 @@ function App()
         item.fixture_id = item.fixture_id.toString();
       });  
        setOddsData(aOdds);
-       setPredictionsData(jsonData[nIndex++].rowdata);
+       let aPredictions = jsonData[nIndex++].rowdata
+       aPredictions.forEach(item => {
+        item.fixture_id = item.fixture_id.toString();
+      });  
+       setPredictionsData(aPredictions);
 
        setStaticDataLoaded(true)
       console.log('events, teams & fixtures loaded')
@@ -195,10 +241,13 @@ function App()
                 </Route>
                 <Route exact path="/FPL2021/input">
                   <FPL2021Input 	fixtureData={fixtureData.filter(f => f.event === weekNumber)}
+                  predictor = {predictorId}
+                  predictionsData={predictionsData.filter(p => p.event === weekNumber && p.predictor_id === predictorId)}
                     getTeam={getTeam}
                     getSequenceByTeam={getSequenceByTeam}
                     getPreviousByFixture={getPreviousByFixture}
                     getOddsByFixture={getOddsByFixture}
+                    submitPredictions={submitPredictions}
                     />
                 </Route>
                 <Route path={["/", "/FPL2021"]}>
