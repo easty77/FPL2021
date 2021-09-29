@@ -20,7 +20,8 @@ import {formatDOWTime} from '../Utils.js';
 import { FeatureFlagScope } from 'carbon-components-react/lib/components/FeatureFlags';
 
 // page only available for the designated current week
-const FPL2021Input = ({predictor, predictionsData, fixtureData, getTeam, getPreviousByFixture, getSequenceByTeam, getOddsByFixture, submitPredictions}) => {
+const FPL2021Input = ({predictor, predictionsData, fixtureData, getTeam, getPreviousByFixture, getSequenceByTeam, getOddsByFixture, 
+    savePredictionData, submitPredictions}) => {
 
 const aInputColumns = [
         { "key": "id", "header": "ID"},
@@ -40,28 +41,22 @@ const [headers, setHeaders] = useState([]);
 const [rows, setRows] = useState([]);
 const [numMatches, setNumMatches] = useState("0");
 const [matchType, setMatchType] = useState("total");
-const [predictionsObj, setPredictionsObj] = useState(null);
 const [canSubmit, setCanSubmit] = useState(false);
 
 useEffect(() => {
-    console.log('In input initialise');
+    console.log('In input create table');
     let aRows = []
-    let objPredict = {}
-    fixtureData.forEach(f => {
-        objPredict[f.id] = {"predictor":predictor, "fixture":f.id, "kickoff_time": f.kickoff_time, "home":0, "away":0, "reason":""}
-    })
     let nReasonCount = 0
     predictionsData.forEach( p => {
-        objPredict[p.fixture_id].home = p.team_h_score
-        objPredict[p.fixture_id].away = p.team_a_score
-        objPredict[p.fixture_id].reason = p.reason
         if (p.reason !== '')
             nReasonCount++
     })
-    setCanSubmit(nReasonCount == fixtureData.length)
     fixtureData.forEach(f => {
         let home = getTeam(f.team_h)
         let away = getTeam(f.team_a)
+        let prediction = predictionsData.find(p => p.fixture_id === parseInt(f.id, 10))
+        let odds = getOddsByFixture(f.id)
+        let previous = getPreviousByFixture(f.id)
         let row = {"id":f.id, "date":f.kickoff_time, 
         "teams":{"home": home.name, "away": away.name},
         "strength": {"home": home.strength, "away": away.strength},
@@ -70,15 +65,15 @@ useEffect(() => {
             "points":"Points",
         "goals":"Goals",
         "sequence":{"home": getSequenceByTeam(f.team_h), "away": getSequenceByTeam(f.team_a)},
-        "previous":getPreviousByFixture(f.id),
-        "odds":getOddsByFixture(f.id),
-        "prediction":objPredict[f.id],
-        "reason":objPredict[f.id]
+        "previous":previous,
+        "odds": odds,
+        "prediction":prediction,
+        "reason":prediction
         }
         aRows.push(row)
     })
-    setPredictionsObj(objPredict)
     setRows(aRows)
+    setCanSubmit(nReasonCount == fixtureData.length)
 },[predictionsData]);
 
   const handleMatchTypeChange = event => {
@@ -92,31 +87,15 @@ useEffect(() => {
   };
   const handleNumberChange = (e) => {
       let aAttributes = e.imaginaryTarget.id.split(".")
-      let po = predictionsObj
-       po[aAttributes[0]][aAttributes[1]] = parseInt(e.imaginaryTarget.value, 10)
-       setPredictionsObj(po)
+      savePredictionData(parseInt(aAttributes[0], 10), aAttributes[1], parseInt(e.imaginaryTarget.value, 10))
   };
   const handleChange = (e) => {
     let aAttributes = e.target.id.split(".")
-    let po = predictionsObj
-    po[aAttributes[0]][aAttributes[1]] = e.target.value
-
-    let bCanSubmit = true
-    for (let p in po) {
-        if (po[p].reason === undefined || predictionsObj[p].reason === '') {
-            bCanSubmit = false
-            break
-        }
-    }
-    console.log('set CanSubmit')
-    setCanSubmit(bCanSubmit)
-
-    console.log('set Predictions')
-    setPredictionsObj(po)
-};
+     savePredictionData(parseInt(aAttributes[0], 10), aAttributes[1], e.target.value)
+ };
 
 const handleSubmitPredictions = () => {
-    submitPredictions(predictionsObj).then(res => console.log('Back in Input: ' + res))
+    submitPredictions().then(res => console.log('Back in Input: ' + res))
   };
 
   return (
@@ -192,14 +171,18 @@ const handleSubmitPredictions = () => {
                   else if (cell.info.header === 'odds') {
                     return (
                       <TableCell key={cell.id}>
+                        {cell.value !== undefined &&
                         <div className="subtable"><div className="odds_row"><span className="cell">{cell.value.dsp_home}</span></div><div className="odds_row"><span className="cell">{cell.value.dsp_draw}</span></div><div className="odds_row"><span className="cell">{cell.value.dsp_away}</span></div></div>
+                        }
                       </TableCell>
                     );
                   }
                   else if (cell.info.header === 'previous') {
                     return (
                       <TableCell key={cell.id}>
+                        {cell.value !== undefined &&
                         <div className="subtable"><div className="row"><span className="cell">{cell.value.m1.h}</span></div><div className="row"><span className="cell">{cell.value.m1.a}</span></div></div>
+                        }
                       </TableCell>
                     );
                   }
@@ -223,12 +206,12 @@ const handleSubmitPredictions = () => {
                         <div className="subtable">
                             <div className="entry_row">
                                 <span className="cell">
-                                    <NumberInput required="" id={cell.value.fixture + ".home"} min={0} max={9} value={cell.value.home} readOnly={!canInput(cell.value.kickoff_time)} onChange={handleNumberChange} />
+                                    <NumberInput required="" id={cell.value.fixture_id + ".team_h_score"} min={0} max={9} value={cell.value.team_h_score} readOnly={!canInput(cell.value.kickoff_time)} onChange={handleNumberChange} />
                                 </span>
                             </div>
                             <div className="entry_row">
                                 <span className="cell">
-                                    <NumberInput required="" id={cell.value.fixture + ".away"} min={0} max={9} value={cell.value.away} readOnly={!canInput(cell.value.kickoff_time)} onChange={handleNumberChange} />
+                                    <NumberInput required="" id={cell.value.fixture_id + ".team_a_score"} min={0} max={9} value={cell.value.team_a_score} readOnly={!canInput(cell.value.kickoff_time)} onChange={handleNumberChange} />
                                 </span>
                             </div>
                         </div>
@@ -238,7 +221,7 @@ const handleSubmitPredictions = () => {
                   else if (cell.info.header === 'reason') {
                     return (
                       <TableCell key={cell.id}>
-                        <TextInput required="" id={cell.value.fixture + ".reason"} labelText="reason" hideLabel={true} maxLength="128" width="40" value={cell.value.reason} readOnly={!canInput(cell.value.kickoff_time)} onChange={handleChange} />
+                        <TextInput required="" id={cell.value.fixture_id + ".reason"} labelText="reason" hideLabel={true} maxLength="128" width="40" value={cell.value.reason} readOnly={!canInput(cell.value.kickoff_time)} onChange={handleChange} />
                       </TableCell>
                     );
                   }

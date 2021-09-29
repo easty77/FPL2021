@@ -13,7 +13,7 @@ import {
 import {getFixtureColumns} from '../Utils.js';
 
 
-const FPL2021Home = ({predictionsData, fixtureData, getTeam, getOddsByFixture}) => {
+const FPL2021Home = ({predictionsData, fixtureData, getTeam, getOddsByFixture, currentWeek}) => {
 
 const aWeekColumns = [
   { "key": "id", "header": "Fixture"},
@@ -28,15 +28,21 @@ const aWeekColumns = [
   { "key": "AP", "header": "AP"}
 ];
 
-const [weekNumber, setWeekNumber] = useState("1");
+const [weekNumber, setWeekNumber] = useState(1);
 const [weekData, setWeekData] = useState(null);
 
-    useEffect(() => {
+useEffect(() => {
+  console.log('In Home initialise');
+  setWeekNumber(currentWeek)
+},[]);
+
+useEffect(() => {
         console.log('Week changed:' + weekNumber);
         if (predictionsData === null)
           return;
-        let aFiltered = JSON.parse(JSON.stringify(fixtureData.filter(f => f.event.toString() === weekNumber))); // deep copy
-        let aWeekPredictions = predictionsData.filter(p => p.event.toString() === weekNumber)
+        let aFiltered = JSON.parse(JSON.stringify(fixtureData.filter(f => f.event === weekNumber))); // deep copy
+        let aWeekPredictions = predictionsData.filter(p => p.event === weekNumber)
+        let totalRow = {"id":"Total"}
         aFiltered.forEach(f => {
           let h = getTeam(f.team_h)
           if (h !== undefined) {
@@ -58,21 +64,32 @@ const [weekData, setWeekData] = useState(null);
             let aPredictions = aWeekPredictions.filter(p => p.fixture_id.toString() === f.id)  
             aPredictions.forEach(p => {
               f[p.predictor_id] = p
+              if (totalRow[p.predictor_id] === undefined) {
+                totalRow[p.predictor_id] = {"points": getPoints(p), "correct": ((p.correct_score === 1) ? 1 : 0)}
+              }
+              else {
+                totalRow[p.predictor_id].points += getPoints(p)
+                totalRow[p.predictor_id].correct += (p.correct_score === 1) ? 1 : 0
+              }
             })
             let odds = getOddsByFixture(f.id)
             let odds_att = (f.team_h_score >= f.team_a_score) ? ((f.team_h_score === f.team_a_score)  ? 'dsp_draw' : 'dsp_home'): 'dsp_away'
             f.odds = odds[odds_att]
           }
          })
+         aFiltered.push(totalRow)
         setWeekData (aFiltered)
     },[weekNumber, predictionsData]);
     
 
   const handleWeekNumberChange = event => {
-    setWeekNumber(event.target.value);
+    setWeekNumber(parseInt(event.target.value, 10));
   };
   const getPointsClassName = prediction => {
     return "points_" + ((prediction.correct_score * 3) + prediction.bonus_score);
+  };
+  const getPoints = prediction => {
+    return  (prediction.correct_score * 3) + prediction.bonus_score;
   };
 
   const loadPredictionsData = () => {
@@ -105,6 +122,10 @@ const [weekData, setWeekData] = useState(null);
                   <SelectItem value="4" text="4" />
                   <SelectItem value="5" text="5" />
                   <SelectItem value="6" text="6" />
+                  <SelectItem value="7" text="7" />
+                  <SelectItem value="8" text="8" />
+                  <SelectItem value="9" text="9" />
+                  <SelectItem value="10" text="10" />
                 </Select>
               </div>
              </div>
@@ -142,15 +163,18 @@ const [weekData, setWeekData] = useState(null);
                     if (cell.value === undefined) {
                       return (<TableCell key={cell.id}></TableCell>);
                     }
-                    else  {
+                    else if (row.id === 'Total') {
+                      // total row
+                      return (<TableCell key={cell.id}><span>{cell.value.points}</span>(<span>{cell.value.correct}</span>)</TableCell>);
+                    }
+                    else if (cell.value.team_h_score !== undefined) {
                     return (
                         <TableCell key={cell.id} className={getPointsClassName(cell.value)}>
                         {cell.value.team_h_score + "-" + cell.value.team_a_score}
                       </TableCell>
-                    );
-                      }
+                      )
+                    }
                   }
-                  
                   else
                     return <TableCell key={cell.id}>{cell.value}</TableCell>;
                 })}

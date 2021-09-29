@@ -15,7 +15,7 @@ import {
 } from 'carbon-components-react';
 import {Link, useLocation} from 'react-router-dom';
 
-const FPL2021Header = () => {
+const FPL2021Header = ({isLoggedIn, facebookName, facebookPicture}) => {
   const location = useLocation()
 
     return (
@@ -28,13 +28,18 @@ const FPL2021Header = () => {
           onClick={onClickSideNavExpand}
           isActive={isSideNavExpanded}
         />
-        <HeaderName element={Link} to="/FPL2021" prefix="FPL2021">
+        <HeaderName element={Link} to="/" prefix="FPL2021">
         Home
         </HeaderName>
         <HeaderNavigation aria-label="FPL2021">
-          <HeaderMenuItem isCurrentPage={location.pathname==='/FPL2021/input'} element={Link} to="/FPL2021/input">Input</HeaderMenuItem>
-          <HeaderMenuItem isCurrentPage={location.pathname==='/FPL2021/championship'} element={Link} to="/FPL2021/championship">Championship</HeaderMenuItem>
-          <HeaderMenuItem isCurrentPage={location.pathname==='/FPL2021/predictions'} element={Link} to="/FPL2021/predictions">Predictions</HeaderMenuItem>
+          { isLoggedIn &&
+          <HeaderMenuItem isCurrentPage={location.pathname==='/input'} element={Link} to="/input">Input</HeaderMenuItem>
+        }
+          <HeaderMenuItem isCurrentPage={location.pathname==='/championship'} element={Link} to="/championship">Championship</HeaderMenuItem>
+          <HeaderMenuItem isCurrentPage={location.pathname==='/predictions'} element={Link} to="/predictions">Predictions</HeaderMenuItem>
+          { facebookName === 'Simon East' &&
+          <HeaderMenuItem isCurrentPage={location.pathname==='/admin'} element={Link} to="/admin">Admin</HeaderMenuItem>
+          }
         </HeaderNavigation>
         <SideNav
           aria-label="Side navigation"
@@ -42,12 +47,20 @@ const FPL2021Header = () => {
           isPersistent={false}>
           <SideNavItems>
             <HeaderSideNavItems>
-              <HeaderMenuItem isCurrentPage={location.pathname==='/FPL2021/input'} element={Link} to="/FPL2021/input">Input</HeaderMenuItem>
-              <HeaderMenuItem isCurrentPage={location.pathname==='/FPL2021/championship'} element={Link} to="/FPL2021/championship">Championship</HeaderMenuItem>
-              <HeaderMenuItem isCurrentPage={location.pathname==='/FPL2021/predictions'} element={Link} to="/FPL2021/predictions">Predictions</HeaderMenuItem>
-            </HeaderSideNavItems>
+              { isLoggedIn &&
+              <HeaderMenuItem isCurrentPage={location.pathname==='/input'} element={Link} to="/input">Input</HeaderMenuItem>
+              }
+              <HeaderMenuItem isCurrentPage={location.pathname==='/championship'} element={Link} to="/championship">Championship</HeaderMenuItem>
+              <HeaderMenuItem isCurrentPage={location.pathname==='/predictions'} element={Link} to="/predictions">Predictions</HeaderMenuItem>
+              { facebookName === 'Simon East' &&
+                <HeaderMenuItem isCurrentPage={location.pathname==='/admin'} element={Link} to="/admin">Admin</HeaderMenuItem>
+              }
+          </HeaderSideNavItems>
           </SideNavItems>
-        </SideNav>      
+        </SideNav>    
+        { facebookPicture !== null &&
+        <img  style={{"align-self":"flex-end"}} src={facebookPicture} width="50" height="50" />
+        }  
       </Header>
      )}
     />    

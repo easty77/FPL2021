@@ -52,8 +52,9 @@ const [scoreType, setScoreType] = useState("points");
       if (!(event in prev)) {
          prev[event] = createScoreRow(event)
       }
-      // tested using XX
-      if (prev[event][next.predictor_id] !== undefined) {
+      // tested using predictor_id=XX, so that dmust not break
+      // match must have taken place
+      if (prev[event][next.predictor_id] !== undefined && next.correct_score !== undefined) {
         prev[event][next.predictor_id].correct += next.correct_score 
         prev[event][next.predictor_id].points += (3 * next.correct_score) + next.bonus_score
         let profit_value = -1; 
@@ -73,7 +74,7 @@ const [scoreType, setScoreType] = useState("points");
     let aRows = Object.keys(m1).map(id => m1[id]);
 
     // need to deep copy else 1st element is updated!
-    let m2 = JSON.parse(JSON.stringify(aRows)).reduce((prev, next) =>{
+    let m2 = [...aRows].reduce((prev, next) =>{
       console.log(prev)
       for (const a in next) {
         if (a!=="id") {
@@ -87,7 +88,7 @@ const [scoreType, setScoreType] = useState("points");
                 prev[a][b].value += next[a][b].value
                 prev[a][b].display += (next[a][b].value  > 0) ? "Y" : "-"
               }
-              else  
+              else if (next[a][b] !== undefined)
                 prev[a][b] += next[a][b]
            }
           }
