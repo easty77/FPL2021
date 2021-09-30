@@ -172,7 +172,17 @@ const handleSubmitPredictions = () => {
                     return (
                       <TableCell key={cell.id}>
                         {cell.value !== undefined &&
-                        <div className="subtable"><div className="odds_row"><span className="cell">{cell.value.dsp_home}</span></div><div className="odds_row"><span className="cell">{cell.value.dsp_draw}</span></div><div className="odds_row"><span className="cell">{cell.value.dsp_away}</span></div></div>
+                        <div className="subtable">
+                            <div className="odds_row">
+                                <span className={`cell odds odds${cell.value.rank[0]}`}>{cell.value.dsp_home}</span>
+                            </div>
+                            <div className="odds_row">
+                                <span className={`cell odds odds${cell.value.rank[1]}`}>{cell.value.dsp_draw}</span>
+                            </div>
+                            <div className="odds_row">
+                                <span className={`cell odds odds${cell.value.rank[2]}`}>{cell.value.dsp_away}</span>
+                            </div>
+                        </div>
                         }
                       </TableCell>
                     );

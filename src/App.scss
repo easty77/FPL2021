@@ -37,11 +37,25 @@
 .result_A {background-color: lightgrey !important;text-align:center;}
 .result_D {background-color: orange !important;text-align:center;}
 
-.points_0 {background-color: white !important;text-align:center;}
-.points_1 {background-color: pink !important;text-align:center;}
-.points_3 {background-color: cyan !important;text-align:center;}
-.points_4 {background-color: yellow !important;text-align:center;}
-.points_5 {background-color: greenyellow !important;text-align:center;}
+.points_1 {background-color: lightgrey !important;text-align:center;}
+.points_3, .points_4, .points_5 {background-color: greenyellow !important;text-align:center;}
+
+.points_5::after {
+  content:" *"
+}
+.points_4::after {
+  content:" +"
+}
+
+.result_H::before {
+  content:"H   "
+}
+.result_D::before {
+  content:"X   "
+}
+.result_A::before {
+  content:"A   "
+}
 
 .subtable {
   display: table;
@@ -84,4 +98,18 @@
   line-height: 8px; 
   background-color: pink;
   text-align: center;
+}
+
+.odds {
+  font-weight: bold !important;
+  text-align: center !important;
+}
+.odds1 {
+  background-color: #98fb98 !important;
+}
+.odds2 {
+  background-color: #FFFF99 !important;
+}
+.odds3 {
+  background-color: #FF7F7F !important;
 }

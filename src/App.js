@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {Content} from 'carbon-components-react';
+import {Button, Content} from 'carbon-components-react';
 import {BrowserRouter, Switch, Route} from 'react-router-dom';
 import FacebookLogin from 'react-facebook-login';
 import './App.scss';
@@ -210,9 +210,13 @@ function App()
       aOdds.forEach(item => {
         item.id = item.fixture_id.toString();
         item.fixture_id = item.fixture_id.toString();
+        item.rank = rankOdds([item.home, item.draw, item.away])
       });  
        setOddsData(aOdds);
        let aPredictions = jsonData[nIndex++].rowdata
+       aPredictions.forEach( p => {
+         p.total_score = 3 * p.correct_score + p.bonus_score
+       })
        setPredictionsData(aPredictions);
 
        if (process.env.NODE_ENV === 'development') {
@@ -228,6 +232,17 @@ function App()
   const isLoggedIn=()=> {
     return predictorId !== null
   }
+  function rankOdds(arr) {
+    // return string ranking odds with lowest as 1
+    let sorted = arr.slice().sort(function(a, b) {
+      return a - b
+    })
+    let ranks = arr.slice().map(function(v) {
+      return sorted.indexOf(v) + 1
+    });
+    return ranks.join('');
+  }
+
   const loadInputPredictionsData=()=> {
     let aInputPredictions = [...predictionsData.filter(p => p.event === weekNumber.input && p.predictor_id=== predictorId)]
     fixtureData.filter(f => f.event === weekNumber.input).forEach(f1 =>{
@@ -287,15 +302,16 @@ function App()
       setPredictorId(strInitials)
     }
   };
-
+  const handleReloadData = () => {
+    setStaticDataLoaded(true)
+    loadBaseData()
+  }
     return (
     <div className="container">
         <DebugRouter silent basename="/FPL2021">
            <FPL2021Header isLoggedIn={isLoggedIn()} facebookName={facebookName} facebookPicture={facebookPicture} />
            <Content>
-           {process.env.NODE_ENV !== 'development' &&
-            <>
-            {!isLoggedIn() &&
+            {process.env.NODE_ENV !== 'development' && !isLoggedIn() &&
               <FacebookLogin
                 appId={faceBookAppId}
                 autoLoad={true}
@@ -305,8 +321,6 @@ function App()
                 disableMobileRedirect={true}
                 icon="fa-facebook" />
             }   
-            </>
-            }
              { staticDataLoaded &&
               <Switch>
                 <Route exact path="/predictions">
@@ -344,6 +358,9 @@ function App()
                 </Route>
               </Switch>
               }
+             { staticDataLoaded &&
+            <Button kind="primary" onClick={handleReloadData}>Reload</Button>
+             }
               </Content>
           </DebugRouter>
      </div>

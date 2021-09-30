@@ -40,7 +40,7 @@ useEffect(() => {
         console.log('Week changed:' + weekNumber);
         if (predictionsData === null)
           return;
-        let aFiltered = JSON.parse(JSON.stringify(fixtureData.filter(f => f.event === weekNumber))); // deep copy
+        let aFiltered = [...fixtureData.filter(f => f.event === weekNumber)]; // deep copy
         let aWeekPredictions = predictionsData.filter(p => p.event === weekNumber)
         let totalRow = {"id":"Total"}
         aFiltered.forEach(f => {
@@ -73,8 +73,9 @@ useEffect(() => {
               }
             })
             let odds = getOddsByFixture(f.id)
-            let odds_att = (f.team_h_score >= f.team_a_score) ? ((f.team_h_score === f.team_a_score)  ? 'dsp_draw' : 'dsp_home'): 'dsp_away'
-            f.odds = odds[odds_att]
+            let odds_att = (f.team_h_score >= f.team_a_score) ? ((f.team_h_score === f.team_a_score)  ? 1 : 0): 2
+            f.odds = {"value": odds[['dsp_home','dsp_draw', 'dsp_away'][odds_att]], "rank": odds.rank[odds_att],
+          "display": ("H: " + odds.dsp_home + "\nD: " + odds.dsp_draw + "\nA: " + odds.dsp_away)}
           }
          })
          aFiltered.push(totalRow)
@@ -84,9 +85,6 @@ useEffect(() => {
 
   const handleWeekNumberChange = event => {
     setWeekNumber(parseInt(event.target.value, 10));
-  };
-  const getPointsClassName = prediction => {
-    return "points_" + ((prediction.correct_score * 3) + prediction.bonus_score);
   };
   const getPoints = prediction => {
     return  (prediction.correct_score * 3) + prediction.bonus_score;
@@ -105,7 +103,6 @@ useEffect(() => {
       savePredictions(aPredictions);
     });
   };
-
   return (
     <>
         <div className="bx--grid">
@@ -147,29 +144,31 @@ useEffect(() => {
             {rows.map(row => (
               <TableRow key={row.id.toString()} {...getRowProps({ row })}>
                 {row.cells.map(cell => {
-                  if (cell.info.header === 'score') {
-                    if (cell.value === undefined) {
-                      return (<TableCell key={cell.id}></TableCell>);
-                    }
-                    else  {
-                  return (
+                  if (cell.value === undefined) {
+                    return (<TableCell key={cell.id}></TableCell>);
+                  }
+                  else if (cell.info.header === 'score') {
+                   return (
                       <TableCell key={cell.id} className={`result_${cell.value.result}`}>
                         {cell.value.h + "-" + cell.value.a}
                       </TableCell>
                     );
                   }
+                  else if (cell.info.header === 'odds') {
+                      return (
+                          <TableCell key={cell.id} className={`cell odds odds${cell.value.rank}`}>
+                            <div title={cell.value.display}>{cell.value.value}</div>
+                          </TableCell>
+                        );
                   }
-                  else if (cell.info.header !== 'id' && cell.info.header !== 'team_h' && cell.info.header !== 'team_a' && cell.info.header !== 'odds') {
-                    if (cell.value === undefined) {
-                      return (<TableCell key={cell.id}></TableCell>);
-                    }
-                    else if (row.id === 'Total') {
+                  else if (cell.info.header !== 'id' && cell.info.header !== 'team_h' && cell.info.header !== 'team_a') {
+                    if (row.id === 'Total') {
                       // total row
                       return (<TableCell key={cell.id}><span>{cell.value.points}</span>(<span>{cell.value.correct}</span>)</TableCell>);
                     }
                     else if (cell.value.team_h_score !== undefined) {
                     return (
-                        <TableCell key={cell.id} className={getPointsClassName(cell.value)}>
+                        <TableCell key={cell.id} className={`points_${cell.value.total_score}`}>
                         {cell.value.team_h_score + "-" + cell.value.team_a_score}
                       </TableCell>
                       )
