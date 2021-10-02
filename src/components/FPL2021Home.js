@@ -8,17 +8,18 @@ import {
   TableBody,
   TableCell,
   Select,
-  SelectItem
+  SelectItem,
+  Button
 } from 'carbon-components-react';
 import {getFixtureColumns} from '../Utils.js';
 
 
-const FPL2021Home = ({predictionsData, fixtureData, getTeam, getOddsByFixture, currentWeek}) => {
+const FPL2021Home = ({predictionsData, fixtureData, getTeam, getOddsByFixture, currentWeek, handleReloadData}) => {
 
 const aWeekColumns = [
-  { "key": "id", "header": "Fixture"},
-  { "key": "team_h", "header": "H"},
-  { "key": "team_a", "header": "A"},
+  { "key": "id", "header": "ID"},
+  { "key": "fixture", "header": "Fixture"},
+  { "key": "result", "header": "Result"},
   { "key": "score", "header": "Score"},
   { "key": "odds", "header": "Odds"},
   { "key": "SE", "header": "SE"},
@@ -28,7 +29,7 @@ const aWeekColumns = [
   { "key": "AP", "header": "AP"}
 ];
 
-const [weekNumber, setWeekNumber] = useState(1);
+const [weekNumber, setWeekNumber] = useState(null);
 const [weekData, setWeekData] = useState(null);
 
 useEffect(() => {
@@ -37,48 +38,66 @@ useEffect(() => {
 },[]);
 
 useEffect(() => {
-        console.log('Week changed:' + weekNumber);
-        if (predictionsData === null)
+        if (predictionsData === null || weekNumber === null)
           return;
-        let aFiltered = [...fixtureData.filter(f => f.event === weekNumber)]; // deep copy
+        console.log('Week changed:' + weekNumber);
+        let aFiltered = [...fixtureData.filter(f => f.event === weekNumber)]; // shallow copy, is this sufficient?
         let aWeekPredictions = predictionsData.filter(p => p.event === weekNumber)
-        let totalRow = {"id":"Total"}
+        let aPredictors = [...new Set(aWeekPredictions.map(item => item.predictor_id))]; 
+        let totalRow = {"id":"Total", "result":{"H":0, "D":0, "A":0}, odds:{"F1":0, "F2":0, "F3":0}, "score":0}
+        let nFinished = 0
         aFiltered.forEach(f => {
-          let h = getTeam(f.team_h)
-          if (h !== undefined) {
-            f.team_h = h.name
+           if (f.team_h_name === undefined) {
+            f.team_h_name = getTeam(f.team_h).name
           }
-          else {
-            console.log('GetTeam home failed: ' + f.team_h)
+          if (f.team_a_name === undefined) {
+            f.team_a_name = getTeam(f.team_a).name
           }
-          let a = getTeam(f.team_a)
-          if (a !== undefined) {
-            f.team_a = a.name
-          }
-          else {
-            console.log('GetTeam away failed: ' + f.team_h)
-          }
-          if (f.team_h_score !== null) {
-            let result = (f.team_h_score >= f.team_a_score) ? ((f.team_h_score === f.team_a_score)  ? 'D' : 'H'): 'A'
-            f.score = {"h":f.team_h_score, "a":f.team_a_score, "result": result}
-            let aPredictions = aWeekPredictions.filter(p => p.fixture_id.toString() === f.id)  
-            aPredictions.forEach(p => {
-              f[p.predictor_id] = p
-              if (totalRow[p.predictor_id] === undefined) {
-                totalRow[p.predictor_id] = {"points": getPoints(p), "correct": ((p.correct_score === 1) ? 1 : 0)}
-              }
-              else {
-                totalRow[p.predictor_id].points += getPoints(p)
-                totalRow[p.predictor_id].correct += (p.correct_score === 1) ? 1 : 0
-              }
-            })
+          f.fixture = {"team_h":f.team_h_name, "team_a":f.team_a_name}
+          let aPredictions = aWeekPredictions.filter(p => p.fixture_id.toString() === f.id)  
+          aPredictions.forEach(p => {
+            f[p.predictor_id] = p
+            let nIndexPrediction = (p.team_h_score >= p.team_a_score) ? ((p.team_h_score === p.team_a_score)  ? 1 : 0): 2
+            if (totalRow[p.predictor_id] === undefined) {
+              totalRow[p.predictor_id] = {"points": 0, "correct": 0, "H":0, "D":0, "A":0, "goals":0, "count":0}
+            }
+            totalRow[p.predictor_id].count += 1
+            totalRow[p.predictor_id].goals += (p.team_h_score + p.team_a_score)
+            totalRow[p.predictor_id][['H', 'D', 'A'][nIndexPrediction]] += 1
+          })
+          if (f.finished === true) {
+            nFinished++
+            let nIndexResult = (f.team_h_score >= f.team_a_score) ? ((f.team_h_score === f.team_a_score)  ? 1 : 0): 2
+            f.score = {"h":f.team_h_score, "a":f.team_a_score}
+            f.result = ['H', 'D', 'A'][nIndexResult]
             let odds = getOddsByFixture(f.id)
-            let odds_att = (f.team_h_score >= f.team_a_score) ? ((f.team_h_score === f.team_a_score)  ? 1 : 0): 2
-            f.odds = {"value": odds[['dsp_home','dsp_draw', 'dsp_away'][odds_att]], "rank": odds.rank[odds_att],
-          "display": ("H: " + odds.dsp_home + "\nD: " + odds.dsp_draw + "\nA: " + odds.dsp_away)}
+            f.odds = {"value": odds[['dsp_home','dsp_draw', 'dsp_away'][nIndexResult]], "rank": odds.rank[nIndexResult],
+                "display": ("H: " + odds.dsp_home + "\nD: " + odds.dsp_draw + "\nA: " + odds.dsp_away)}
+            totalRow.score += (f.score.h + f.score.a)
+            totalRow.result[f.result] += 1
+            totalRow.odds['F' + f.odds.rank] += 1    
+            aPredictions.forEach(p => {
+              totalRow[p.predictor_id].points += getPoints(p)
+              totalRow[p.predictor_id].correct += (p.correct_score === 1) ? 1 : 0
+            })
           }
-         })
-         aFiltered.push(totalRow)
+        })
+        aPredictors.forEach(pid => {
+          if (totalRow[pid].count > 0) {
+            totalRow[pid].goals = totalRow[pid].goals/totalRow[pid].count;  // convert total goals to average goals
+          }
+          totalRow[pid].display = totalRow[pid].H + "-" + totalRow[pid].D + "-" + totalRow[pid].A
+          totalRow[pid].full_display =  totalRow[pid].display + (" (" + totalRow[pid].goals + ")" )
+        })
+        if (nFinished > 0) {
+          totalRow.score = totalRow.score / nFinished;  // convert total goals to average goals
+        }
+        else{
+          totalRow.score = undefined
+          totalRow.result = undefined
+          totalRow.odds = undefined
+        }
+        aFiltered.push(totalRow)
         setWeekData (aFiltered)
     },[weekNumber, predictionsData]);
     
@@ -108,6 +127,7 @@ useEffect(() => {
         <div className="bx--grid">
             <div className="bx--row">
               <div className="bx--col-lg-12">
+                { weekNumber !== null &&
                 <Select
                   id="week_number"
                   labelText="Week"
@@ -124,6 +144,7 @@ useEffect(() => {
                   <SelectItem value="9" text="9" />
                   <SelectItem value="10" text="10" />
                 </Select>
+                }
               </div>
              </div>
           </div>
@@ -147,24 +168,53 @@ useEffect(() => {
                   if (cell.value === undefined) {
                     return (<TableCell key={cell.id}></TableCell>);
                   }
+                  else if (cell.info.header === 'fixture') {
+                    return (
+                       <TableCell key={cell.id}>
+                         {cell.value.team_h + " v " + cell.value.team_a}
+                       </TableCell>
+                     );
+                   }
                   else if (cell.info.header === 'score') {
-                   return (
-                      <TableCell key={cell.id} className={`result_${cell.value.result}`}>
-                        {cell.value.h + "-" + cell.value.a}
-                      </TableCell>
-                    );
+                    if (row.id === 'Total') {
+                      // total row
+                      return (<TableCell key={cell.id}>{cell.value}</TableCell>);
+                    }
+                    else  {
+                      return (
+                          <TableCell key={cell.id}>
+                            {cell.value.h + "-" + cell.value.a}
+                          </TableCell>
+                        );
+                    }
+                  }
+                  else if (cell.info.header === 'result' && row.id === 'Total') {
+                      // total row
+                      return (<TableCell key={cell.id}><span>{cell.value.H}</span>-<span>{cell.value.D}</span>-<span>{cell.value.A}</span></TableCell>);
                   }
                   else if (cell.info.header === 'odds') {
+                    if (row.id === 'Total') {
+                      // total row
+                      return (<TableCell key={cell.id}><span>{cell.value.F1}</span>-<span>{cell.value.F2}</span>-<span>{cell.value.F3}</span></TableCell>);
+                    }
+                    else  {
                       return (
                           <TableCell key={cell.id} className={`cell odds odds${cell.value.rank}`}>
                             <div title={cell.value.display}>{cell.value.value}</div>
                           </TableCell>
                         );
+                      }
                   }
-                  else if (cell.info.header !== 'id' && cell.info.header !== 'team_h' && cell.info.header !== 'team_a') {
+                  else if (cell.info.header !== 'id' && cell.info.header !== 'result') {
+                    // predictions column
                     if (row.id === 'Total') {
-                      // total row
-                      return (<TableCell key={cell.id}><span>{cell.value.points}</span>(<span>{cell.value.correct}</span>)</TableCell>);
+                      // total row, either distribution (before results come in) or points
+                      if (cell.value.points === 0) {
+                        return (<TableCell key={cell.id}><span title={cell.value.goals}>{cell.value.display}</span></TableCell>);
+                      }
+                      else {
+                        return (<TableCell key={cell.id}><span title={cell.value.full_display}>{cell.value.points}</span>(<span>{cell.value.correct}</span>)</TableCell>);
+                      }
                     }
                     else if (cell.value.team_h_score !== undefined) {
                     return (
@@ -184,6 +234,7 @@ useEffect(() => {
       )}
     </DataTable>
 }
+    <Button kind="primary" onClick={handleReloadData}>Reload</Button>
     </>
   );
 };

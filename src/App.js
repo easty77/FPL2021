@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {Button, Content} from 'carbon-components-react';
+import {Content} from 'carbon-components-react';
 import {BrowserRouter, Switch, Route} from 'react-router-dom';
 import FacebookLogin from 'react-facebook-login';
 import './App.scss';
@@ -41,7 +41,7 @@ function App()
       odds: '/FPL2021/data/odds.json',
       sequence: '/FPL2021/data/team_results_sequence_2021.json',
       previous: '/FPL2021/data/team_previous_instances_2021.json',
-      team_stats:{"0":"/FPL2021/data/team_stats_2021.json", "3":"/FPL2021/data/team_last3_stats_2021.json"},
+      team_stats:{"0":"/FPL2021/data/team_stats_2021.json", "3":"/FPL2021/data/team_last3_stats_2021.json", "5":"/FPL2021/data/team_last5_stats_2021.json"},
       save_predictions:'/FPL2021/data/success.json'
     },
     server: {
@@ -51,7 +51,7 @@ function App()
       odds: '/FPL/servlet/ENEFPLServlet?action=select_matchodds&output=json&year=2021',
       sequence: '/json/fpl/team_results_sequence_2021.json',
       previous: '/json/fpl/team_previous_instances_2021.json',
-      team_stats:{"0":"/json/fpl/team_stats_2021.json", "3":"/json/fpl/team_last3_stats_2021.json"},
+      team_stats:{"0":"/json/fpl/team_stats_2021.json", "3":"/json/fpl/team_last3_stats_2021.json", "5":"/json/fpl/team_last5_stats_2021.json"},
       save_predictions:'/FPL/servlet/ENEFPLServlet?action=save_predictions&output=json&year=2021'
     },
   };
@@ -62,7 +62,7 @@ function App()
   const [facebookName, setFacebookName] = useState(null);
 
   const [predictorId, setPredictorId] = useState(null);
-  const [weekNumber, setWeekNumber] = useState({"display":1,"input":1});
+  const [weekNumber, setWeekNumber] = useState(null);
   const [eventsData, setEventsData] = useState(null);
   const [teamsData, setTeamsData] = useState(null);
   const [fixtureData, setFixtureData] = useState(null);
@@ -92,10 +92,23 @@ function App()
   },[predictorId]);
 
   const getTeam=( id )=>{
-    return teamsData.find(t => t.id === id.toString())
+    let team = teamsData.find(t => t.id === id.toString())
+    if (team === undefined)
+      console.log('Team not found: ' + id)
+    else
+      return team;  
   }  
-  const getTeamStats=( id )=>{
-    return teamsData.find(t => t.id === id.toString())
+  const getTeamStats=( id, nMatches )=>{
+    if (nMatches === undefined) {
+      let objTeamStats = {}
+      for (let att in teamStatsData) {
+        objTeamStats[att] = teamStatsData[att].find(t => t.id === id.toString())
+      }
+      return objTeamStats
+    }
+    else {
+      return teamStatsData[nMatches.toString()].find(t => t.id === id.toString())
+    }
   }  
   const getPreviousByFixture=( fixture_id )=>{
     return previousInstanceData.find(f => f.fixture_id === fixture_id)
@@ -184,7 +197,6 @@ function App()
           
           nEvent++
       }
-      setWeekNumber({"display":nEventDisplay, "input":nEventInput})
 
       let tSD = {};
       let nIndex = 2;
@@ -214,10 +226,16 @@ function App()
       });  
        setOddsData(aOdds);
        let aPredictions = jsonData[nIndex++].rowdata
+       let nMaxPredictionEvent = 0
        aPredictions.forEach( p => {
          p.total_score = 3 * p.correct_score + p.bonus_score
+         if (p.event > nMaxPredictionEvent)
+         nMaxPredictionEvent = p.event
        })
        setPredictionsData(aPredictions);
+       if (nMaxPredictionEvent > nEventDisplay)
+        nEventDisplay = nMaxPredictionEvent
+       setWeekNumber({"display":nEventDisplay, "input":nEventInput})
 
        if (process.env.NODE_ENV === 'development') {
         setPredictorId('SE')
@@ -321,7 +339,7 @@ function App()
                 disableMobileRedirect={true}
                 icon="fa-facebook" />
             }   
-             { staticDataLoaded &&
+             { staticDataLoaded && weekNumber !== null &&
               <Switch>
                 <Route exact path="/predictions">
                   <FPL2021Predictions 	predictionsData={predictionsData} 
@@ -336,6 +354,7 @@ function App()
                   predictor = {predictorId}
                     predictionsData={inputPredictionsData}
                     getTeam={getTeam}
+                    getTeamStats={getTeamStats}
                     getSequenceByTeam={getSequenceByTeam}
                     getPreviousByFixture={getPreviousByFixture}
                     getOddsByFixture={getOddsByFixture}
@@ -354,13 +373,11 @@ function App()
                     getTeam={getTeam}
                     getOddsByFixture={getOddsByFixture}
                     currentWeek = {weekNumber.display}
+                    handleReloadData = {handleReloadData}
                     /> 
                 </Route>
               </Switch>
               }
-             { staticDataLoaded &&
-            <Button kind="primary" onClick={handleReloadData}>Reload</Button>
-             }
               </Content>
           </DebugRouter>
      </div>

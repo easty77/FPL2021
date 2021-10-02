@@ -18,15 +18,26 @@ import {getChampionshipColumns} from '../Utils.js';
 const FPL2021Championship = ({teamStatsData}) => {
 
 
-const [headers, setHeaders] = useState([]);
 const [rows, setRows] = useState([]);
 const [numMatches, setNumMatches] = useState("0");
 const [matchType, setMatchType] = useState("total");
 
   useEffect(() => {
-    setRows(teamStatsData[numMatches])
-    setHeaders(filterColumns())
-	},[teamStatsData, numMatches,matchType]);
+    console.log('In useEffect number')
+    
+    let aFiltered = teamStatsData[numMatches]
+    // check for undefined
+    aFiltered.forEach(row => {
+      for (let att in row) {
+         if (row[att] === undefined) {
+           console.log("Undefined: " + row.id + "-" + att)
+         } 
+      }
+    })
+
+    setRows(aFiltered)
+
+	},[teamStatsData, numMatches]);
 
   const loadTeamStatsData = () => {
     let retrieveURLs = retrieveURL('team_stats');
@@ -48,8 +59,7 @@ const [matchType, setMatchType] = useState("total");
       }
       saveTeamStats(tSD);
       setRows(tSD[numMatches])
-      setHeaders(filterColumns())
-    });
+      });
   };
   const filterColumns = () => {
     let aFilterColumns = []
@@ -66,8 +76,32 @@ const [matchType, setMatchType] = useState("total");
   const handleNumMatchesChange = event => {
     setNumMatches(event.target.value);
   };
+  const customSortRow = (cellA, cellB, { sortDirection, sortStates, locale }) => {
+    console.log('In customSortRow')
+    if (cellA === undefined)
+      console.log('Undefined cellA')
+    if (sortDirection === sortStates.DESC) {
+      return compare(cellB, cellA, locale);
+    }
+    return compare(cellA, cellB, locale);
+  }
+  const compare = (a, b, locale) => {
+    if (a === undefined) {
+      console.log('Undefined a: ' + b)
+    }
+    if (typeof a === "string") {
+      return a.localeCompare(b, locale)
+    }
+    else {
+      return a - b
+    }
+  }
+  const isColumnVisible = (id) => {
+    return id === "name" ||  (id.indexOf(matchType + "_") === 0)
 
-  return (
+  }
+
+return (
     <>
         <div className="bx--grid">
             <div className="bx--row">
@@ -90,28 +124,34 @@ const [matchType, setMatchType] = useState("total");
                   onChange={handleNumMatchesChange}>
                   <SelectItem value="0" text="All" />
                   <SelectItem value="3" text="Three" />
+                  <SelectItem value="5" text="Five" />
                 </Select>
               </div>
             </div>
           </div>
     { teamStatsData !== null && 
-    <DataTable rows={rows} headers={headers} isSortable>
+    <DataTable rows={rows} headers={getChampionshipColumns()} isSortable sortRow={customSortRow}>
       {({ rows, headers, getHeaderProps, getRowProps, getTableProps }) => (
         <Table {...getTableProps()} size="compact">
           <TableHead>
             <TableRow>
-              {headers.map(header => (
-                <TableHeader key={header.key} {...getHeaderProps({ header })}>
+              {headers.map(header => {
+                if (isColumnVisible(header.key)) {
+                 return (<TableHeader key={header.key} {...getHeaderProps({ header })}>
                   {header.header}
-                </TableHeader>
-              ))}
+                </TableHeader>)
+                }
+              } 
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
             {rows.map(row => (
               <TableRow key={row.id} {...getRowProps({ row })}>
                 {row.cells.map(cell => {
+                  if (isColumnVisible(cell.info.header)) {
                     return <TableCell key={cell.id}>{cell.value}</TableCell>;
+                  }
                 })}
               </TableRow>
             ))}

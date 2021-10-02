@@ -74,8 +74,7 @@ const [scoreType, setScoreType] = useState("points");
     let aRows = Object.keys(m1).map(id => m1[id]);
 
     // need to deep copy else 1st element is updated!
-    let m2 = [...aRows].reduce((prev, next) =>{
-      console.log(prev)
+    let m2 = JSON.parse(JSON.stringify(aRows)).reduce((prev, next) =>{
       for (const a in next) {
         if (a!=="id") {
           if (prev[a] === undefined) {

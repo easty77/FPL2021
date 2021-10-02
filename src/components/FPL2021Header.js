@@ -59,7 +59,7 @@ const FPL2021Header = ({isLoggedIn, facebookName, facebookPicture}) => {
           </SideNavItems>
         </SideNav>    
         { facebookPicture !== null &&
-        <img  style={{"align-self":"flex-end"}} src={facebookPicture} width="50" height="50" />
+        <img src={facebookPicture} width="50" height="50" />
         }  
       </Header>
      )}
