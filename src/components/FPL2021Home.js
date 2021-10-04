@@ -11,7 +11,7 @@ import {
   SelectItem,
   Button
 } from 'carbon-components-react';
-import {getFixtureColumns} from '../Utils.js';
+import {getFixtureColumns, getResultIndex} from '../Utils.js';
 
 
 const FPL2021Home = ({predictionsData, fixtureData, getTeam, getOddsByFixture, currentWeek, handleReloadData, predictors}) => {
@@ -58,7 +58,7 @@ useEffect(() => {
           let aPredictions = aWeekPredictions.filter(p => p.fixture_id.toString() === f.id)  
           aPredictions.forEach(p => {
             f[p.predictor_id] = p
-            let nIndexPrediction = (p.team_h_score >= p.team_a_score) ? ((p.team_h_score === p.team_a_score)  ? 1 : 0): 2
+            let nIndexPrediction = getResultIndex(p)
             if (totalRow[p.predictor_id] === undefined) {
               totalRow[p.predictor_id] = {"points": 0, "correct": 0, "H":0, "D":0, "A":0, "goals":0, "count":0}
             }
@@ -68,7 +68,7 @@ useEffect(() => {
           })
           if (f.finished === true) {
             nFinished++
-            let nIndexResult = (f.team_h_score >= f.team_a_score) ? ((f.team_h_score === f.team_a_score)  ? 1 : 0): 2
+            let nIndexResult = getResultIndex(f)
             f.score = {"h":f.team_h_score, "a":f.team_a_score}
             f.result = ['H', 'D', 'A'][nIndexResult]
             let odds = getOddsByFixture(f.id)
