@@ -143,3 +143,6 @@ export const formatDOWTime = (isoDate)=>{
         ];
     }
     
+    export const getResultIndex = (obj) => {
+        return (obj.team_h_score >= obj.team_a_score) ? ((obj.team_h_score === obj.team_a_score) ? 1 : 0): 2
+    }

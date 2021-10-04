@@ -15,6 +15,7 @@ import FPL2021Home from './components/FPL2021Home'
 import FPL2021Input from './components/FPL2021Input'
 import FPL2021Header from './components/FPL2021Header'
 import FPL2021Admin from './components/FPL2021Admin'
+import {getResultIndex} from './Utils.js';
 
 class DebugRouter extends BrowserRouter {
   constructor( props ){
@@ -61,6 +62,7 @@ function App()
   const [facebookPicture, setFacebookPicture] = useState('');
   const [facebookName, setFacebookName] = useState(null);
 
+  const predictors = ["SE", "TE", "ME", "PE", "AP"]
   const [predictorId, setPredictorId] = useState(null);
   const [weekNumber, setWeekNumber] = useState(null);
   const [eventsData, setEventsData] = useState(null);
@@ -324,6 +326,25 @@ function App()
     setStaticDataLoaded(true)
     loadBaseData()
   }
+  const getResultsAggregate = () => {
+    let aResults = fixtureData.filter(f => f.finished === true)
+    let aAgg = aResults.reduce((prev, next) =>{
+      if (prev[next.event] === undefined) {
+        prev[next.event] = {"result":{"H":0, "D": 0, "A" : 0}, "odds":{"1":0, "2":0, "3":0}}
+      }
+      let nIndex = getResultIndex(next)
+      prev[next.event].result[['H', 'D', 'A'][nIndex]]++
+      let odds = oddsData.find(o => o.fixture_id === next.id)
+      let resultOddsRank = rankOdds([odds.home, odds.draw, odds.away])[nIndex]
+      prev[next.event].odds[resultOddsRank]++
+      return prev;
+    }, {});
+
+    return aAgg
+  }
+
+
+
     return (
     <div className="container">
         <DebugRouter silent basename="/FPL2021">
@@ -342,8 +363,12 @@ function App()
              { staticDataLoaded && weekNumber !== null &&
               <Switch>
                 <Route exact path="/predictions">
-                  <FPL2021Predictions 	predictionsData={predictionsData} 
-                    getProfit = {calculateFixtureProfit} /> 
+                  <FPL2021Predictions 	
+                    predictionsData={predictionsData} 
+                    getProfit = {calculateFixtureProfit} 
+                    predictors = {predictors}
+                    getResultsAggregate = {getResultsAggregate}
+                    /> 
                 </Route>
                 <Route exact path="/championship">
                   <FPL2021Championship 	teamStatsData={teamStatsData}
@@ -369,6 +394,7 @@ function App()
                 }
                 <Route path={["/", "/FPL2021"]}>
                   <FPL2021Home 	predictionsData={predictionsData}
+                    predictors={predictors}
                     fixtureData={fixtureData}
                     getTeam={getTeam}
                     getOddsByFixture={getOddsByFixture}

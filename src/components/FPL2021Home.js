@@ -14,26 +14,27 @@ import {
 import {getFixtureColumns} from '../Utils.js';
 
 
-const FPL2021Home = ({predictionsData, fixtureData, getTeam, getOddsByFixture, currentWeek, handleReloadData}) => {
+const FPL2021Home = ({predictionsData, fixtureData, getTeam, getOddsByFixture, currentWeek, handleReloadData, predictors}) => {
 
-const aWeekColumns = [
-  { "key": "id", "header": "ID"},
-  { "key": "fixture", "header": "Fixture"},
-  { "key": "result", "header": "Result"},
-  { "key": "score", "header": "Score"},
-  { "key": "odds", "header": "Odds"},
-  { "key": "SE", "header": "SE"},
-  { "key": "PE", "header": "PE"},
-  { "key": "ME", "header": "ME"},
-  { "key": "TE", "header": "TE"},
-  { "key": "AP", "header": "AP"}
-];
+
 
 const [weekNumber, setWeekNumber] = useState(null);
 const [weekData, setWeekData] = useState(null);
+const [weekColumns, setWeekColumns] = useState(null);
 
 useEffect(() => {
   console.log('In Home initialise');
+  let aWeekColumns = [
+    { "key": "id", "header": "ID"},
+    { "key": "fixture", "header": "Fixture"},
+    { "key": "result", "header": "Result"},
+    { "key": "score", "header": "Score"},
+    { "key": "odds", "header": "Odds"},
+  ];
+  predictors.forEach(p => {
+    aWeekColumns.push({ "key": p, "header": p})
+  })
+  setWeekColumns(aWeekColumns)
   setWeekNumber(currentWeek)
 },[]);
 
@@ -149,7 +150,7 @@ useEffect(() => {
              </div>
           </div>
     { weekData !== null && 
-    <DataTable rows={weekData} headers={aWeekColumns}>
+    <DataTable rows={weekData} headers={weekColumns}>
       {({ rows, headers, getHeaderProps, getRowProps, getTableProps }) => (
         <Table {...getTableProps()} size="compact">
           <TableHead>

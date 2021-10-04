@@ -12,19 +12,19 @@ import {
 } from 'carbon-components-react';
 
 
-const FPL2021Predictions = ({predictionsData, getProfit}) => {
+const FPL2021Predictions = ({predictionsData, getProfit, predictors, getResultsAggregate}) => {
 
-const aAggregatedColumns = [
-  { "key": "id", "header": "Event"},
-  { "key": "SE", "header": "SE"},
-  { "key": "PE", "header": "PE"},
-  { "key": "ME", "header": "ME"},
-  { "key": "TE", "header": "TE"},
-  { "key": "AP", "header": "AP"}
-];
-
+const [predictionsColumns, setPredictionsColumns] = useState(null);
 const [aggregatedPredictionsData, setAggregatedPredictionsData] = useState(null);
 const [scoreType, setScoreType] = useState("points");
+
+useEffect(() => {
+  let aColumns = [{ "key": "id", "header": "Event"}, { "key": "result", "header": "Results"}, { "key": "odds", "header": "Odds"}]
+  predictors.forEach(p => {
+    aColumns.push({ "key": p, "header": p})
+  })
+  setPredictionsColumns(aColumns)
+},[]);
 
   useEffect(() => {
       setAggregatedPredictionsData(getPredictionsData())
@@ -36,14 +36,10 @@ const [scoreType, setScoreType] = useState("points");
 
 
   const createScoreRow = (id) => {
-    let empty =
-    {"id":id, 
-            "SE":{"correct":0, "points":0, "profit":{"value":0, "display":""}}, 
-            "PE":{"correct":0, "points":0, "profit":{"value":0, "display":""}}, 
-            "TE":{"correct":0, "points":0, "profit":{"value":0, "display":""}}, 
-            "ME":{"correct":0, "points":0, "profit":{"value":0, "display":""}}, 
-            "AP":{"correct":0, "points":0, "profit":{"value":0, "display":""}}
-          };
+    let empty = {"id":id}
+    predictors.forEach(p => {
+      empty[p] = {"correct":0, "points":0, "profit":{"value":0, "display":""}}
+    }) 
     return empty;      
   } 
   const getPredictionsData = () => {
@@ -72,15 +68,22 @@ const [scoreType, setScoreType] = useState("points");
     }, {});
 
     let aRows = Object.keys(m1).map(id => m1[id]);
-
+    let aggData  = getResultsAggregate()
+    aRows.forEach(r => {
+      let aggObj = aggData[parseInt(r.id, 10)]
+      if (aggObj !== undefined) {
+        r.result = aggObj.result.H + "-" + aggObj.result.D + "-" + aggObj.result.A
+        r.odds = aggObj.odds[1] + "-" + aggObj.odds[2] + "-" + aggObj.odds[3] 
+      }
+    })
     // need to deep copy else 1st element is updated!
     let m2 = JSON.parse(JSON.stringify(aRows)).reduce((prev, next) =>{
       for (const a in next) {
-        if (a!=="id") {
+        if (a!=="id" && a!=="result" &&a!=="odds") {
           if (prev[a] === undefined) {
               prev[a] = next[a]
               prev[a].profit.display = (next[a].profit.value  > 0) ? "Y" : "-"
-          }
+           }
           else {
             for (const b in next[a]) {
               if (b === 'profit') {
@@ -117,7 +120,7 @@ const [scoreType, setScoreType] = useState("points");
              </div>
           </div>
     { aggregatedPredictionsData !== null && 
-    <DataTable rows={aggregatedPredictionsData} headers={aAggregatedColumns}>
+    <DataTable rows={aggregatedPredictionsData} headers={predictionsColumns}>
       {({ rows, headers, getHeaderProps, getRowProps, getTableProps }) => (
         <Table {...getTableProps()} size="compact">
           <TableHead>
@@ -133,7 +136,7 @@ const [scoreType, setScoreType] = useState("points");
             {rows.map(row => (
               <TableRow key={row.id.toString()} {...getRowProps({ row })}>
                 {row.cells.map(cell => {
-                  if (cell.info.header != 'id') {
+                  if (cell.info.header != 'id' && cell.info.header != 'result' && cell.info.header != 'odds') {
                     return (
                       <TableCell key={cell.id}>
                         {scoreType === "profit" && cell.value.profit.value != undefined ? 
