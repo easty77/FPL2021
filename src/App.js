@@ -15,7 +15,7 @@ import FPL2021Home from './components/FPL2021Home'
 import FPL2021Input from './components/FPL2021Input'
 import FPL2021Header from './components/FPL2021Header'
 import FPL2021Admin from './components/FPL2021Admin'
-import {getResultIndex} from './Utils.js';
+import {getResultIndex, rankArray} from './Utils.js';
 
 class DebugRouter extends BrowserRouter {
   constructor( props ){
@@ -63,6 +63,7 @@ function App()
   const [facebookName, setFacebookName] = useState(null);
 
   const predictors = ["SE", "TE", "ME", "PE", "AP"]
+  const [numCols, setNumCols] = useState(5);
   const [predictorId, setPredictorId] = useState(null);
   const [weekNumber, setWeekNumber] = useState(null);
   const [eventsData, setEventsData] = useState(null);
@@ -82,9 +83,31 @@ function App()
     ];
   };
 
+  const getNumCols=()=>{
+
+    if( document.documentElement.clientWidth < 672 ){
+      return 1
+    } else if( document.documentElement.clientWidth < 1056 ){
+      return 2
+    } else if( document.documentElement.clientWidth < 1312 ){
+      return 3
+    } else if( document.documentElement.clientWidth < 1584 ){
+      return 4
+    }
+    else return 5
+  }
+
+
   useEffect(() => {
     // initialise
     loadBaseData();
+    const handleResize = () =>{ setNumCols( getNumCols( ))}
+    window.removeEventListener( "resize", handleResize )
+    window.addEventListener( "resize", handleResize )
+    if( document.getElementById("loading_overlay") !== null ) document.getElementById("loading_overlay").remove()
+    return (()=>{
+      window.removeEventListener( "resize", handleResize )
+    })
 	},[]);
 
   useEffect(() => {
@@ -120,6 +143,9 @@ function App()
   }  
   const getOddsByFixture=( fixture_id )=>{
     return oddsData.find(o=> o.fixture_id === fixture_id)
+  } 
+  const getFixture=( fixture_id )=>{
+    return fixtureData.find(f=> f.id === fixture_id)
   } 
   
   const calculateFixtureProfit=( fixture_id )=>{
@@ -183,6 +209,15 @@ function App()
       let nEventInput = 0
       let nEvent=1
       while (aFixtures.findIndex(f => f.event === nEvent) >= 0) {
+          let eventFixtures = aFixtures.filter(f => f.event === nEvent)
+          eventFixtures.forEach(f => {
+            let hteam = aTeams.find(t => t.id === f.team_h.toString())
+            let ateam = aTeams.find(t => t.id === f.team_a.toString())
+            f.team_h_name = hteam.name
+            f.team_a_name = ateam.name
+            f.team_h_short_name = hteam.short_name
+            f.team_a_short_name = ateam.short_name
+          })
           if (aFixtures.findIndex(f => f.event === nEvent && f.finished === false) >= 0) {
               // there is an unfinished match, so activate Input for this week
               nEventInput = nEvent
@@ -244,7 +279,7 @@ function App()
         setFacebookName('Simon East')
         setFacebookPicture('https://platform-lookaside.fbsbx.com/platform/profilepic/?asid=1405387009639461&height=50&width=50&ext=1635351184&hash=AeTwmQNSsJ3QQ-1cmQo')
        }
- 
+       setNumCols(getNumCols())
       setStaticDataLoaded(true)
       console.log('events, teams & fixtures loaded')
     });
@@ -253,14 +288,7 @@ function App()
     return predictorId !== null
   }
   function rankOdds(arr) {
-    // return string ranking odds with lowest as 1
-    let sorted = arr.slice().sort(function(a, b) {
-      return a - b
-    })
-    let ranks = arr.slice().map(function(v) {
-      return sorted.indexOf(v) + 1
-    });
-    return ranks.join('');
+     return rankArray(arr, true).join('');
   }
 
   const loadInputPredictionsData=()=> {
@@ -385,6 +413,8 @@ function App()
                     getOddsByFixture={getOddsByFixture}
                     submitPredictions={submitPredictions}
                     savePredictionData={savePredictionData}
+                    getFixture={getFixture}
+                    numCols={numCols}
                     />
                 </Route>
                 {predictorId === 'SE' &&

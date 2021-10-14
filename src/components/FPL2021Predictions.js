@@ -10,6 +10,7 @@ import {
   Select,
   SelectItem
 } from 'carbon-components-react';
+import {rankArray} from '../Utils.js';
 
 
 const FPL2021Predictions = ({predictionsData, getProfit, predictors, getResultsAggregate}) => {
@@ -38,7 +39,7 @@ useEffect(() => {
   const createScoreRow = (id) => {
     let empty = {"id":id}
     predictors.forEach(p => {
-      empty[p] = {"correct":0, "points":0, "profit":{"value":0, "display":""}}
+      empty[p] = {"correct":{"value":0, "rank":0}, "points":{"value":0, "rank":0}, "profit":{"value":0, "display":"", "rank":0}}
     }) 
     return empty;      
   } 
@@ -51,8 +52,8 @@ useEffect(() => {
       // tested using predictor_id=XX, so that dmust not break
       // match must have taken place
       if (prev[event][next.predictor_id] !== undefined && next.correct_score !== undefined) {
-        prev[event][next.predictor_id].correct += next.correct_score 
-        prev[event][next.predictor_id].points += (3 * next.correct_score) + next.bonus_score
+        prev[event][next.predictor_id].correct.value += next.correct_score 
+        prev[event][next.predictor_id].points.value += (3 * next.correct_score) + next.bonus_score
         let profit_value = -1; 
         if (next.correct_score == 1) {
           let profit = getProfit(next.fixture_id)
@@ -68,6 +69,8 @@ useEffect(() => {
     }, {});
 
     let aRows = Object.keys(m1).map(id => m1[id]);
+
+    // add aggregate data about number of Home wins, Favourite wins etc
     let aggData  = getResultsAggregate()
     aRows.forEach(r => {
       let aggObj = aggData[parseInt(r.id, 10)]
@@ -76,6 +79,7 @@ useEffect(() => {
         r.odds = aggObj.odds[1] + "-" + aggObj.odds[2] + "-" + aggObj.odds[3] 
       }
     })
+    // Add total row
     // need to deep copy else 1st element is updated!
     let m2 = JSON.parse(JSON.stringify(aRows)).reduce((prev, next) =>{
       for (const a in next) {
@@ -87,12 +91,10 @@ useEffect(() => {
           else {
             for (const b in next[a]) {
               if (b === 'profit') {
-                prev[a][b].value += next[a][b].value
                 prev[a][b].display += (next[a][b].value  > 0) ? "Y" : "-"
               }
-              else if (next[a][b] !== undefined)
-                prev[a][b] += next[a][b]
-           }
+              prev[a][b].value += next[a][b].value
+            }
           }
         }
       }
@@ -100,6 +102,20 @@ useEffect(() => {
     }, {});
     m2.id = "Total"
     aRows.push(m2) 
+
+        // add rank
+        let aAttributes = ['correct', 'points', 'profit']
+        aRows.forEach(r => {
+          aAttributes.forEach( x => {
+            let aValues = []
+            predictors.forEach(p => aValues.push(r[p][x].value))
+            let aRank = rankArray(aValues, false)
+            predictors.forEach((p, index) => {
+              r[p][x].rank = aRank[index]
+            })
+            })
+        })
+    
     return aRows;
 }
   return (
@@ -138,10 +154,10 @@ useEffect(() => {
                 {row.cells.map(cell => {
                   if (cell.info.header != 'id' && cell.info.header != 'result' && cell.info.header != 'odds') {
                     return (
-                      <TableCell key={cell.id}>
+                      <TableCell key={cell.id} className={`cell rank${cell.value[scoreType].rank}`}>
                         {scoreType === "profit" && cell.value.profit.value != undefined ? 
                         <div title={cell.value.profit.display}>{cell.value.profit.value.toFixed(2)}</div> 
-                        : cell.value[scoreType] }
+                        : cell.value[scoreType].value }
                       </TableCell>
                     );
                   }

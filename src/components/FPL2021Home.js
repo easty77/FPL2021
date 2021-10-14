@@ -220,7 +220,7 @@ useEffect(() => {
                     else if (cell.value.team_h_score !== undefined) {
                     return (
                         <TableCell key={cell.id} className={`points_${cell.value.total_score}`}>
-                        {cell.value.team_h_score + "-" + cell.value.team_a_score}
+                        <span title={cell.value.reason}>{cell.value.team_h_score + "-" + cell.value.team_a_score}</span>
                       </TableCell>
                       )
                     }

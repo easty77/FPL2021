@@ -17,15 +17,15 @@ import {
   NumberInput,
   Button
 } from 'carbon-components-react';
-import {formatDOWTime} from '../Utils.js';
+import {formatDOWTime, displayFixture} from '../Utils.js';
 import { FeatureFlagScope } from 'carbon-components-react/lib/components/FeatureFlags';
 
 // page only available for the designated current week
 const FPL2021Input = ({predictor, predictionsData, fixtureData, getTeam, getPreviousByFixture, getSequenceByTeam, getOddsByFixture, 
-    savePredictionData, submitPredictions, getTeamStats}) => {
+    savePredictionData, submitPredictions, getTeamStats, getFixture, numCols}) => {
 
 const aInputColumns = [
-        { "key": "id", "header": "ID", "mandatory":true},
+        { "key": "id", "header": "ID", "mandatory":false, "preselected":false},
         { "key": "date", "header": "Date", "mandatory":true},
         { "key": "teams", "header": "Fixture", "mandatory":true},
         { "key": "att_def", "header": "Attack v Defence", "mandatory":false, "preselected":false},
@@ -36,8 +36,8 @@ const aInputColumns = [
         { "key": "ppda", "header": "PPDA", "mandatory":false, "preselected":false},
         { "key": "shots", "header": "Shots", "mandatory":false, "preselected":false},
         { "key": "strength", "header": "Strength", "mandatory":false, "preselected":false},
-        { "key": "sequence", "header": "Sequence", "mandatory":true},
-        { "key": "previous", "header": "Previous", "mandatory":true},
+        { "key": "sequence", "header": "Sequence", "mandatory":false, "preselected":true},
+        { "key": "previous", "header": "Previous", "mandatory":false, "preselected":true},
         { "key": "odds", "header": "Odds", "mandatory":true},
         { "key": "prediction", "header": "Prediction", "mandatory":true},
         { "key": "reason", "header": "Reason", "mandatory":true}
@@ -51,8 +51,8 @@ const [canSubmit, setCanSubmit] = useState(false);
 const [filteredColumns, setFilteredColumns] = useState(null);
 
 useEffect(()=> {
-  console.log('In input initialise');
-  setFilteredColumns(aInputColumns.filter(c => c.mandatory === true || c.preselected === true))
+  console.log('In input initialise: ' + numCols);
+  setFilteredColumns(aInputColumns.filter(c => c.mandatory === true || (numCols >= 3 && c.preselected === true)))
 },[]);
 
 useEffect(() => {
@@ -74,7 +74,7 @@ useEffect(() => {
         let hstats = getTeamStats(f.team_h)
         let astats = getTeamStats(f.team_a)
         let row = {"id":f.id, "date":f.kickoff_time, 
-        "teams":{"home": home.name, "away": away.name},
+        "teams":{"home": (numCols >= 3) ? home.name : home.short_name, "away": (numCols >= 3) ? away.name : away.short_name},
         "strength": {"home": home.strength, "away": away.strength},
         "att_def": 
         {
@@ -87,7 +87,16 @@ useEffect(() => {
         "deep":{"home": {}, "away": {}},
         "ppda":{"home": {}, "away": {}},
         "possession":{"home": {}, "away": {}},
-        "sequence":{"home": {"total":hsequence.all_matches, "ha":hsequence.home}, "away": {"total":asequence.all_matches, "ha":asequence.away}},
+        "sequence":{
+          "home": {
+            "total":{"results":hsequence.all_matches, "fixtures": hsequence.all_fixtures},
+            "ha":{"results":hsequence.home, "fixtures":hsequence.home_fixtures}
+                  }, 
+          "away": {
+            "total":{"results":asequence.all_matches, "fixtures": asequence.all_fixtures},
+            "ha":{"results":asequence.away, "fixtures":asequence.away_fixtures} 
+                  }
+          },
         "previous":previous,
         "odds": odds,
         "prediction":prediction,
@@ -182,9 +191,30 @@ const handleOptionalColumnsChange = (event) => {
   console.log(event)
   setFilteredColumns(aInputColumns.filter(c => c.mandatory === true || (event.selectedItems.findIndex(c1 => c1.key === c.key) >= 0)))
 }
+
+const renderSequence=(cell) => {
+  return (
+  <TableCell key={cell.id}>
+  <div className="subtable">
+    <div className="row">
+      <span className="cell">{renderSequenceElement(cell.value.home[matchType])}</span>
+    </div>
+    <div className="row">
+      <span className="cell">{renderSequenceElement(cell.value.away[matchType])}</span>
+    </div>
+  </div>
+</TableCell>
+  )
+}
+const renderSequenceElement=(sequence) => {
+  let aFixtures = sequence.fixtures.split("-")
+  // JSON.stringify(getFixture(aFixtures[index]))
+  return sequence.results.split("").map((r,index) => <span title={displayFixture(getFixture(aFixtures[index]), numCols)}>{r}</span>)
+}
   return (
     <>
         <div className="bx--grid">
+          {numCols >= 3 &&
             <div className="bx--row">
                  <div className="bx--col-lg-4">
                     <MultiSelect
@@ -218,6 +248,7 @@ const handleOptionalColumnsChange = (event) => {
                     </Select>
                 </div>
             </div>
+        }
         </div>
     { rows !== null && filteredColumns !== null && 
     <>
@@ -387,18 +418,7 @@ const handleOptionalColumnsChange = (event) => {
                     );
                   }
                   else if (cell.info.header === 'sequence') {
-                    return (
-                      <TableCell key={cell.id}>
-                        <div className="subtable">
-                          <div className="row">
-                            <span className="cell">{cell.value.home[matchType]}</span>
-                          </div>
-                          <div className="row">
-                            <span className="cell">{cell.value.away[matchType]}</span>
-                          </div>
-                        </div>
-                      </TableCell>
-                    );
+                    return renderSequence(cell);
                   }
                   else if (cell.info.header === 'date') {
                     return (

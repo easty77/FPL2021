@@ -146,3 +146,20 @@ export const formatDOWTime = (isoDate)=>{
     export const getResultIndex = (obj) => {
         return (obj.team_h_score >= obj.team_a_score) ? ((obj.team_h_score === obj.team_a_score) ? 1 : 0): 2
     }
+
+    export const rankArray = (arr, bAscending) => {
+
+        let sorted = arr.slice().sort(function(a, b) {
+            return bAscending ? (a - b) : (b - a)
+          })
+          let ranks = arr.slice().map(function(v) {
+            return sorted.indexOf(v) + 1
+          });
+
+          return ranks
+    }
+  export const displayFixture = (f, numCols) => {
+      let hteam = (numCols >= 3) ? f.team_h_name : f.team_h_short_name
+      let ateam = (numCols >= 3) ? f.team_a_name : f.team_a_short_name
+      return `${hteam}: ${f.team_h_score}\n${ateam}: ${f.team_a_score}`
+  }
