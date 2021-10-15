@@ -34,10 +34,21 @@ export const formatDate = (isoDate)=>{
     let date = new Date(isoDate)
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
 } 
-export const formatDOWTime = (isoDate)=>{
+export const formatTime = (isoDate)=>{
+    let date = new Date(isoDate)
+    return date.toLocaleTimeString().substr(0, 5)
+} 
+export const formatDOWTime = (isoDate, numCols)=>{
+    var short_days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
     var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     let date = new Date(isoDate)
-    return days[date.getDay()] + ' ' + date.toLocaleTimeString().substr(0, 5)
+    return (numCols >= 3 ? days[date.getDay()] : short_days[date.getDay()]) + ' ' + date.toLocaleTimeString().substr(0, 5)
+} 
+export const formatDOW = (isoDate, numCols)=>{
+    var short_days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    let date = new Date(isoDate)
+    return (numCols >= 3 ? days[date.getDay()] : short_days[date.getDay()])
 } 
   export const getPredictionsColumns = ()=>{
     return [

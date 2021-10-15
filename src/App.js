@@ -117,7 +117,7 @@ function App()
 
   useEffect(() => {
     console.log('App:useEffect predictions')
-    if (predictionsData !== null) {
+    if (predictionsData !== null && weekNumber !== null) {
       loadInputPredictionsData()
     }
   },[predictorId, predictionsData]);

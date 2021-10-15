@@ -17,7 +17,7 @@ import {
   NumberInput,
   Button
 } from 'carbon-components-react';
-import {formatDOWTime, displayFixture} from '../Utils.js';
+import {formatDOW, formatTime, displayFixture} from '../Utils.js';
 import { FeatureFlagScope } from 'carbon-components-react/lib/components/FeatureFlags';
 
 // page only available for the designated current week
@@ -360,7 +360,14 @@ const renderReason=(fixture) => {
                   else if (cell.info.header === 'date') {
                     return (
                       <TableCell key={cell.id}>
-                        {formatDOWTime(cell.value)}
+                         <div className="subtable">
+                          <div className="row">
+                            <span className="cell">{formatDOW(cell.value, numCols)}</span>
+                          </div>
+                          <div className="row">
+                            <span className="cell">{formatTime(cell.value)}</span>
+                          </div>
+                        </div>
                       </TableCell>
                     );
                   }
