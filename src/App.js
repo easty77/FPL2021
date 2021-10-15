@@ -120,7 +120,7 @@ function App()
     if (predictionsData !== null) {
       loadInputPredictionsData()
     }
-  },[predictorId]);
+  },[predictorId, predictionsData]);
 
   useEffect(() => {
     console.log('App:useEffect input data')

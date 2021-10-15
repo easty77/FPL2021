@@ -21,8 +21,7 @@ import {formatDOWTime, displayFixture} from '../Utils.js';
 import { FeatureFlagScope } from 'carbon-components-react/lib/components/FeatureFlags';
 
 // page only available for the designated current week
-const FPL2021Input = ({inputWeekData, predictionsData, getTeam, getPreviousByFixture, getSequenceByTeam, getOddsByFixture, 
-    savePredictionData, submitPredictions, getTeamStats, getFixture, numCols}) => {
+const FPL2021Input = ({inputWeekData, predictionsData, savePredictionData, submitPredictions, getFixture, numCols}) => {
 
 const aInputColumns = [
         { "key": "id", "header": "ID", "mandatory":false, "preselected":false},
