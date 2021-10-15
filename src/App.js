@@ -377,7 +377,10 @@ function App()
        let aPredictions = jsonData[nIndex++].rowdata
        let nMaxPredictionEvent = 0
        aPredictions.forEach( p => {
-         p.total_score = 3 * p.correct_score + p.bonus_score
+         if (p.correct_score !== undefined && p.bonus_score !== undefined) {
+          p.total_score = 3 * p.correct_score + p.bonus_score
+         }
+         p.result = ['H', 'D', 'A'][getResultIndex(p)]
          if (p.event > nMaxPredictionEvent)
          nMaxPredictionEvent = p.event
        })
@@ -508,6 +511,7 @@ function App()
                     getProfit = {calculateFixtureProfit} 
                     predictors = {predictors}
                     getResultsAggregate = {getResultsAggregate}
+                    numCols={numCols}
                     /> 
                 </Route>
                 <Route exact path="/championship">
@@ -541,6 +545,7 @@ function App()
                     getOddsByFixture={getOddsByFixture}
                     currentWeek = {weekNumber.display}
                     handleReloadData = {handleReloadData}
+                    numCols={numCols}
                     /> 
                 </Route>
               </Switch>

@@ -13,19 +13,23 @@ import {
 import {rankArray} from '../Utils.js';
 
 
-const FPL2021Predictions = ({predictionsData, getProfit, predictors, getResultsAggregate}) => {
+const FPL2021Predictions = ({predictionsData, getProfit, predictors, getResultsAggregate, numCols}) => {
 
 const [predictionsColumns, setPredictionsColumns] = useState(null);
 const [aggregatedPredictionsData, setAggregatedPredictionsData] = useState(null);
 const [scoreType, setScoreType] = useState("points");
 
 useEffect(() => {
-  let aColumns = [{ "key": "id", "header": "Event"}, { "key": "result", "header": "Results"}, { "key": "odds", "header": "Odds"}]
+  let aColumns = [{ "key": "id", "header": "Event"}]
+  if (numCols >= 3) {
+    aColumns.push({ "key": "result", "header": "Results"})
+    aColumns.push({ "key": "odds", "header": "Odds"})
+  }
   predictors.forEach(p => {
     aColumns.push({ "key": p, "header": p})
   })
   setPredictionsColumns(aColumns)
-},[]);
+},[numCols]);
 
   useEffect(() => {
       setAggregatedPredictionsData(getPredictionsData())

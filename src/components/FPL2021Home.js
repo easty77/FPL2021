@@ -14,29 +14,36 @@ import {
 import {getFixtureColumns, getResultIndex} from '../Utils.js';
 
 
-const FPL2021Home = ({predictionsData, fixtureData, getTeam, getOddsByFixture, currentWeek, handleReloadData, predictors}) => {
+const FPL2021Home = ({predictionsData, fixtureData, getTeam, getOddsByFixture, currentWeek, handleReloadData, predictors, numCols}) => {
 
 
 
 const [weekNumber, setWeekNumber] = useState(null);
 const [weekData, setWeekData] = useState(null);
 const [weekColumns, setWeekColumns] = useState(null);
+const [weekResults, setWeekResults] = useState(false);
 
 useEffect(() => {
   console.log('In Home initialise');
   let aWeekColumns = [
-    { "key": "id", "header": "ID"},
+  //  { "key": "id", "header": "ID"},
     { "key": "fixture", "header": "Fixture"},
-    { "key": "result", "header": "Result"},
-    { "key": "score", "header": "Score"},
-    { "key": "odds", "header": "Odds"},
   ];
+  if (weekResults) {
+    aWeekColumns.push({ "key": "score", "header": "Score"})
+  }
+  if (numCols >= 3) {
+    aWeekColumns.push({ "key": "result", "header": "Result"})
+    aWeekColumns.push({ "key": "odds", "header": "Odds"})
+  }
   predictors.forEach(p => {
     aWeekColumns.push({ "key": p, "header": p})
   })
   setWeekColumns(aWeekColumns)
-  setWeekNumber(currentWeek)
-},[]);
+  if (weekNumber === null) {
+    setWeekNumber(currentWeek)
+  }
+},[numCols, weekResults]);
 
 useEffect(() => {
         if (predictionsData === null || weekNumber === null)
@@ -83,6 +90,7 @@ useEffect(() => {
             })
           }
         })
+        setWeekResults(nFinished > 0)
         aPredictors.forEach(pid => {
           if (totalRow[pid].count > 0) {
             totalRow[pid].goals = totalRow[pid].goals/totalRow[pid].count;  // convert total goals to average goals
@@ -219,7 +227,7 @@ useEffect(() => {
                     }
                     else if (cell.value.team_h_score !== undefined) {
                     return (
-                        <TableCell key={cell.id} className={`points_${cell.value.total_score}`}>
+                        <TableCell key={cell.id} className={cell.value.total_score !== undefined ? `points_${cell.value.total_score}` : `result_${cell.value.result}`}>
                         <span title={cell.value.reason}>{cell.value.team_h_score + "-" + cell.value.team_a_score}</span>
                       </TableCell>
                       )
