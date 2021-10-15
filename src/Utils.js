@@ -163,3 +163,8 @@ export const formatDOWTime = (isoDate)=>{
       let ateam = (numCols >= 3) ? f.team_a_name : f.team_a_short_name
       return `${hteam}: ${f.team_h_score}\n${ateam}: ${f.team_a_score}`
   }
+
+  export const avg=(total, count) => {
+    return Math.round(total/count * 10)/10
+  }
+  
