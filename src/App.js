@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {Content} from 'carbon-components-react';
-import {BrowserRouter, Switch, Route} from 'react-router-dom';
+import {HashRouter, Switch, Route} from 'react-router-dom';
 import FacebookLogin from 'react-facebook-login';
 import './App.scss';
 
@@ -16,21 +16,6 @@ import FPL2021Input from './components/FPL2021Input'
 import FPL2021Header from './components/FPL2021Header'
 import FPL2021Admin from './components/FPL2021Admin'
 import {getResultIndex, rankArray, avg} from './Utils.js';
-
-class DebugRouter extends BrowserRouter {
-  constructor( props ){
-    super( props )
-    if( props.silent !== undefined ){
-      console.log( 'initial history is: ', JSON.stringify( this.history, null, 2 ))
-      this.history.listen(( loc, action )=>{
-        console.log(
-          `The current URL is ${ loc.pathname }${ loc.search }${ loc.hash }`
-        )
-        console.log( `The last navigation action was ${ action }`, JSON.stringify( this.history, null, 2 ))
-      })
-    }
-  }
-}
 
 function App()
 {
@@ -490,7 +475,7 @@ function App()
 
     return (
     <div className="container">
-        <DebugRouter silent basename="/FPL2021">
+        <HashRouter silent basename="">
            <FPL2021Header isLoggedIn={isLoggedIn()} facebookName={facebookName} facebookPicture={facebookPicture} />
            <Content>
             {process.env.NODE_ENV !== 'development' && !isLoggedIn() &&
@@ -551,7 +536,7 @@ function App()
               </Switch>
               }
               </Content>
-          </DebugRouter>
+          </HashRouter>
      </div>
     );
 }
