@@ -64,7 +64,7 @@ useEffect(() => {
           if (p.reason !== '')
               nReasonCount++
       })
-      setCanSubmit(numCols < 3 || nReasonCount == inputWeekData.length)
+      setCanSubmit(numCols < 3 || nReasonCount == inputWeekData.filter(f => canInput(f.date)).length)
     }
 },[predictionsData, numCols, inputWeekData]);
 
