@@ -37,6 +37,7 @@ const aInputColumns = [
         { "key": "strength", "header": "Strength", "mandatory":false, "preselected":false},
         { "key": "sequence", "header": "Sequence", "mandatory":false, "preselected":true},
         { "key": "previous", "header": "Previous", "mandatory":false, "preselected":true},
+        { "key": "rank", "header": "Rank", "mandatory":false, "preselected":true},
         { "key": "odds", "header": "Odds", "mandatory":true},
         { "key": "prediction", "header": "Prediction", "mandatory":true},
         { "key": "reason", "header": "Reason", "mandatory":false}
@@ -58,6 +59,7 @@ useEffect(()=> {
 useEffect(() => {
     console.log('Input:useEffect predictions');
     let nReasonCount = 0
+<<<<<<< HEAD
     if (predictionsData !== null && inputWeekData !== null) {
       predictionsData.forEach( p => {
           if (p.reason !== '')
@@ -66,6 +68,14 @@ useEffect(() => {
       setCanSubmit(numCols < 3 || nReasonCount == inputWeekData.length)
     }
 },[predictionsData, numCols, inputWeekData]);
+=======
+    predictionsData.forEach( p => {
+        if (p.reason !== '')
+            nReasonCount++
+    })
+    setCanSubmit(numCols < 3 || nReasonCount === inputWeekData.filter(f => canInput(f.date)).length)
+},[predictionsData, numCols]);
+>>>>>>> 56ca455017f2c55ec4869574f2342c26c2914506
 
   const handleMatchTypeChange = event => {
     setMatchType(event.target.value);
@@ -358,6 +368,22 @@ const renderReason=(fixture) => {
                   }
                   else if (cell.info.header === 'sequence') {
                     return renderSequence(cell);
+                  }
+                  else if (cell.info.header === 'rank') {
+                    return (
+                      <TableCell key={cell.id}>
+                        <div className="subtable">
+                          <div className="row">
+                            <span className="cell">{cell.value.home[numMatches].total_league_position}</span>-
+                            <span className="cell">{cell.value[numMatches][matchType].home}</span>
+                          </div>
+                          <div className="row">
+                            <span className="cell">{cell.value.away[numMatches].total_league_position}</span>-
+                            <span className="cell">{cell.value[numMatches][matchType].away}</span>
+                          </div>
+                        </div>
+                      </TableCell>
+                    );
                   }
                   else if (cell.info.header === 'date') {
                     return (

@@ -137,6 +137,7 @@ function App()
         "shots":{"home": {}, "away": {}},
         "deep":{"home": {}, "away": {}},
         "ppda":{"home": {}, "away": {}},
+        "rank":{"home": {}, "away": {}},
         "possession":{"home": {}, "away": {}},
         "sequence":{
           "home": {
@@ -179,6 +180,7 @@ function App()
             "total":(hstats[att].total_matches === 0) ? undefined : {"for": avg(hstats[att].total_ppda,hstats[att].total_matches), "against": avg(hstats[att].total_vppda,hstats[att].total_matches)},
             "ha":(hstats[att].h_matches === 0) ? undefined : {"for": avg(hstats[att].h_ppda,hstats[att].h_matches), "against": avg(hstats[att].h_vppda,hstats[att].h_matches)}
           }
+          row.rank.home[att] = hstats[att].rank
         }
         for (let att in astats) {
           row.possession.away[att] = {"total":astats[att].total_possession, "ha":astats[att].a_possession}
@@ -206,8 +208,31 @@ function App()
             "total":(astats[att].total_matches === 0) ? undefined : {"for": avg(astats[att].total_ppda,astats[att].total_matches), "against": avg(astats[att].total_vppda,astats[att].total_matches)},
             "ha":(astats[att].a_matches === 0) ? undefined : {"for": avg(astats[att].h_ppda,astats[att].a_matches), "against": avg(astats[att].a_vppda,astats[att].a_matches)}
           }
+          row.rank.away[att] = astats[att].rank
         }  
-        aRows.push(row)
+        for (let att in astats) {
+          let count = {"total":{"home":0, "away": 0}, "ha":{"home":0, "away": 0}};
+          for (let dim in row.rank.home[att]) {
+              if (dim.indexOf("total_") === 0) {
+                if (row.rank.home[att][dim] < row.rank.away[att][dim]) {
+                  count.total.home++
+                }
+                else if (row.rank.home[att][dim] > row.rank.away[att][dim]) {
+                  count.total.away++
+                }
+              }
+              else if (dim.indexOf("h_") === 0) {
+                if (row.rank.home[att][dim] < row.rank.away[att][dim.replace("h_", "a_")]) {
+                  count.ha.home++
+                }
+                else if (row.rank.home[att][dim] > row.rank.away[att][dim.replace("h_", "a_")]) {
+                  count.ha.away++
+                }
+              }
+          }
+          row.rank[att] = count
+        }
+          aRows.push(row)
     })
     setInputWeekData(aRows)
   }
@@ -339,6 +364,46 @@ function App()
           // id for dataTable row must be a string
           aTeamStats.forEach(item => {
               item.id = item.id.toString();
+              item.rank = {}
+          });
+
+          let aTeamStatsCopy = JSON.parse(JSON.stringify(aTeamStats)) // take deep copy to use for sorting
+          let aTypes = ['total', 'h', 'a'];
+          aTypes.forEach(t => {
+            aTeamStatsCopy = aTeamStatsCopy.sort(function(a, b){return (b[t + '_points']*1000 + ((b[t + '_goals'] - b[t + '_goals_conceded']) * 10) + b[t + '_goals']) - (a[t + '_points']*1000 + ((a[t + '_goals'] - a[t + '_goals_conceded']) * 10) + a[t + '_goals'])});
+
+            aTeamStats.forEach(item => {
+              item.rank[t + '_league_position'] = aTeamStatsCopy.findIndex(p => p.id === item.id) + 1;
+            });
+          });
+
+          let aPositive = ['points', 'deep', 'goals', 'xg', 'xpts', 'possession', 'vppda', 'shots', 'target'];
+          let aNegative= ['vdeep', 'goals_conceded', 'vxg', 'ppda', 'vshots', 'vtarget'];
+          aTypes.forEach(t => {
+            aPositive.forEach(p => {
+              // check if already a game average
+              if (p !== 'possession' && p !== 'deep' && p !== 'vppda') {
+                aTeamStatsCopy = aTeamStatsCopy.sort(function(a, b){return b[t + '_' + p]/b[t + '_games']- a[t + '_' + p]/a[t + '_games']});
+              }
+              else {
+                aTeamStatsCopy = aTeamStatsCopy.sort(function(a, b){return b[t + '_' + p]- a[t + '_' + p]});
+              }
+              aTeamStats.forEach(item => {
+                item.rank[t + '_' + p] = aTeamStatsCopy.findIndex(c => c.id === item.id) + 1;
+              });
+            });
+            aNegative.forEach(n => {
+              // check if already a game average
+              if (n !== 'vdeep' && n !== 'ppda') {
+                aTeamStatsCopy = aTeamStatsCopy.sort(function(a, b){return a[t + '_' + n]/a[t + '_games'] - b[t + '_' + n]/b[t + '_games']});
+              }
+              else {
+                aTeamStatsCopy = aTeamStatsCopy.sort(function(a, b){return a[t + '_' + n] - b[t + '_' + n]});
+              }
+              aTeamStats.forEach(item => {
+                item.rank[t + '_' + n] = aTeamStatsCopy.findIndex(c => c.id === item.id) + 1;
+              });
+            });
           });
           tSD[u] = aTeamStats
       }
