@@ -59,7 +59,6 @@ useEffect(()=> {
 useEffect(() => {
     console.log('Input:useEffect predictions');
     let nReasonCount = 0
-<<<<<<< HEAD
     if (predictionsData !== null && inputWeekData !== null) {
       predictionsData.forEach( p => {
           if (p.reason !== '')
@@ -68,14 +67,6 @@ useEffect(() => {
       setCanSubmit(numCols < 3 || nReasonCount == inputWeekData.length)
     }
 },[predictionsData, numCols, inputWeekData]);
-=======
-    predictionsData.forEach( p => {
-        if (p.reason !== '')
-            nReasonCount++
-    })
-    setCanSubmit(numCols < 3 || nReasonCount === inputWeekData.filter(f => canInput(f.date)).length)
-},[predictionsData, numCols]);
->>>>>>> 56ca455017f2c55ec4869574f2342c26c2914506
 
   const handleMatchTypeChange = event => {
     setMatchType(event.target.value);
