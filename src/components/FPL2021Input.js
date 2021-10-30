@@ -58,12 +58,14 @@ useEffect(()=> {
 useEffect(() => {
     console.log('Input:useEffect predictions');
     let nReasonCount = 0
-    predictionsData.forEach( p => {
-        if (p.reason !== '')
-            nReasonCount++
-    })
-    setCanSubmit(numCols < 3 || nReasonCount == inputWeekData.length)
-},[predictionsData, numCols]);
+    if (predictionsData !== null && inputWeekData !== null) {
+      predictionsData.forEach( p => {
+          if (p.reason !== '')
+              nReasonCount++
+      })
+      setCanSubmit(numCols < 3 || nReasonCount == inputWeekData.length)
+    }
+},[predictionsData, numCols, inputWeekData]);
 
   const handleMatchTypeChange = event => {
     setMatchType(event.target.value);
@@ -173,7 +175,7 @@ const renderReason=(fixture) => {
             </div>
         }
         </div>
-    { inputWeekData !== null && filteredColumns !== null && 
+    { inputWeekData !== null && predictionsData != null && filteredColumns !== null && 
     <>
     <DataTable rows={inputWeekData} headers={filteredColumns}>
       {({ rows, headers, getHeaderProps, getRowProps, getTableProps }) => (
