@@ -37,6 +37,7 @@ const aInputColumns = [
         { "key": "strength", "header": "Strength", "mandatory":false, "preselected":false},
         { "key": "sequence", "header": "Sequence", "mandatory":false, "preselected":true},
         { "key": "previous", "header": "Previous", "mandatory":false, "preselected":true},
+        { "key": "rank", "header": "Rank", "mandatory":false, "preselected":true},
         { "key": "odds", "header": "Odds", "mandatory":true},
         { "key": "prediction", "header": "Prediction", "mandatory":true},
         { "key": "reason", "header": "Reason", "mandatory":false}
@@ -62,7 +63,7 @@ useEffect(() => {
         if (p.reason !== '')
             nReasonCount++
     })
-    setCanSubmit(numCols < 3 || nReasonCount == inputWeekData.length)
+    setCanSubmit(numCols < 3 || nReasonCount === inputWeekData.filter(f => canInput(f.date)).length)
 },[predictionsData, numCols]);
 
   const handleMatchTypeChange = event => {
@@ -356,6 +357,22 @@ const renderReason=(fixture) => {
                   }
                   else if (cell.info.header === 'sequence') {
                     return renderSequence(cell);
+                  }
+                  else if (cell.info.header === 'rank') {
+                    return (
+                      <TableCell key={cell.id}>
+                        <div className="subtable">
+                          <div className="row">
+                            <span className="cell">{cell.value.home[numMatches].total_league_position}</span>-
+                            <span className="cell">{cell.value[numMatches][matchType].home}</span>
+                          </div>
+                          <div className="row">
+                            <span className="cell">{cell.value.away[numMatches].total_league_position}</span>-
+                            <span className="cell">{cell.value[numMatches][matchType].away}</span>
+                          </div>
+                        </div>
+                      </TableCell>
+                    );
                   }
                   else if (cell.info.header === 'date') {
                     return (
