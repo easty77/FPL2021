@@ -147,6 +147,7 @@ const renderReason=(fixture) => {
                     <MultiSelect
                     id="optional_columns"
                     label="Optional Columns"
+                    titleText="Optional Columns"
                     items={aInputColumns.filter(c => c.mandatory === false)}
                     initialSelectedItems={aInputColumns.filter(c => c.mandatory === false && c.preselected === true)}
                     itemToString={(item) => item.header}
