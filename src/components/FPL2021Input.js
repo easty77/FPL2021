@@ -19,6 +19,7 @@ import {
 } from 'carbon-components-react';
 import {formatDOW, formatTime, displayFixture} from '../Utils.js';
 import { FeatureFlagScope } from 'carbon-components-react/lib/components/FeatureFlags';
+import FPL2021Compare from './FPL2021Compare'
 
 // page only available for the designated current week
 const FPL2021Input = ({inputWeekData, predictionsData, savePredictionData, submitPredictions, getFixture, numCols}) => {
@@ -183,6 +184,7 @@ const renderReason=(fixture) => {
         <Table {...getTableProps()} size="compact">
           <TableHead>
             <TableRow>
+              <TableExpandHeader />
               {headers.map(header => (
                 <TableHeader key={header.key} {...getHeaderProps({ header })}>
                   {header.header}
@@ -192,7 +194,9 @@ const renderReason=(fixture) => {
           </TableHead>
           <TableBody>
             {rows.map(row => (
-              <TableRow key={row.id} {...getRowProps({ row })}>
+            <React.Fragment key={row.id}>
+            <TableExpandRow
+            key={row.id + 'A'} {...getRowProps({ row })}>
                 {row.cells.map(cell => {
                   if (cell.value === undefined) {
                     return (<TableCell key={cell.id}></TableCell>);
@@ -407,7 +411,17 @@ const renderReason=(fixture) => {
                   else
                     return <TableCell key={cell.id}>{cell.value}</TableCell>;
                 })}  
-              </TableRow>
+              </TableExpandRow>
+              {/* toggle based off of if the row is expanded. If it is, render TableExpandedRow */}
+              {row.isExpanded && (
+                <TableExpandedRow
+                  {...getRowProps({ row })}
+                  colSpan={headers.length + 1}
+                  key={row.id + 'B'}>
+                  <FPL2021Compare comparisonData={row.cells[filteredColumns.findIndex(c => c.key === 'rank')].value} numMatches={numMatches} matchType={matchType} />
+                </TableExpandedRow>
+              )}
+              </React.Fragment>
             ))}
           </TableBody>
         </Table>

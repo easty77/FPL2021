@@ -181,6 +181,7 @@ function App()
             "ha":(hstats[att].h_matches === 0) ? undefined : {"for": avg(hstats[att].h_ppda,hstats[att].h_matches), "against": avg(hstats[att].h_vppda,hstats[att].h_matches)}
           }
           row.rank.home[att] = hstats[att].rank
+          row.rank.home[att].id = f.team_h
         }
         for (let att in astats) {
           row.possession.away[att] = {"total":astats[att].total_possession, "ha":astats[att].a_possession}
@@ -209,6 +210,7 @@ function App()
             "ha":(astats[att].a_matches === 0) ? undefined : {"for": avg(astats[att].h_ppda,astats[att].a_matches), "against": avg(astats[att].a_vppda,astats[att].a_matches)}
           }
           row.rank.away[att] = astats[att].rank
+          row.rank.away[att].id = f.team_a
         }  
         for (let att in astats) {
           let count = {"total":{"home":0, "away": 0}, "ha":{"home":0, "away": 0}};

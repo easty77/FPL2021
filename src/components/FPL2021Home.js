@@ -142,18 +142,11 @@ useEffect(() => {
                   labelText="Week"
                   value={weekNumber}
                   onChange={handleWeekNumberChange}>
-                  <SelectItem value="1" text="1" />
-                  <SelectItem value="2" text="2" />
-                  <SelectItem value="3" text="3" />
-                  <SelectItem value="4" text="4" />
-                  <SelectItem value="5" text="5" />
-                  <SelectItem value="6" text="6" />
-                  <SelectItem value="7" text="7" />
-                  <SelectItem value="8" text="8" />
-                  <SelectItem value="9" text="9" />
-                  <SelectItem value="10" text="10" />
-                </Select>
-                }
+                    {[...Array(38)].map((e, i) => {
+                      return <SelectItem value={i+1} text={i+1} />
+                    })}
+                    </Select>
+                  }
               </div>
              </div>
           </div>
