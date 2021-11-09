@@ -385,22 +385,24 @@ function App()
             aPositive.forEach(p => {
               // check if already a game average
               if (p !== 'possession' && p !== 'deep' && p !== 'vppda') {
-                aTeamStatsCopy = aTeamStatsCopy.sort(function(a, b){return b[t + '_' + p]/b[t + '_games']- a[t + '_' + p]/a[t + '_games']});
+                aTeamStatsCopy.sort(function(a, b){return b[t + '_' + p]/b[t + '_matches']- a[t + '_' + p]/a[t + '_matches']});
               }
               else {
-                aTeamStatsCopy = aTeamStatsCopy.sort(function(a, b){return b[t + '_' + p]- a[t + '_' + p]});
+                aTeamStatsCopy.sort(function(a, b){return b[t + '_' + p]- a[t + '_' + p]});
               }
               aTeamStats.forEach(item => {
                 item.rank[t + '_' + p] = aTeamStatsCopy.findIndex(c => c.id === item.id) + 1;
+                if (u==="3" && t === 'total' && p === 'xpts')
+                  console.log(item.name + '=' + item.rank.total_xpts + "-" + item.total_xpts + "-" + item.total_xpts/item.total_matches)
               });
             });
             aNegative.forEach(n => {
               // check if already a game average
               if (n !== 'vdeep' && n !== 'ppda') {
-                aTeamStatsCopy = aTeamStatsCopy.sort(function(a, b){return a[t + '_' + n]/a[t + '_games'] - b[t + '_' + n]/b[t + '_games']});
+                aTeamStatsCopy.sort(function(a, b){return a[t + '_' + n]/a[t + '_matches'] - b[t + '_' + n]/b[t + '_matches']});
               }
               else {
-                aTeamStatsCopy = aTeamStatsCopy.sort(function(a, b){return a[t + '_' + n] - b[t + '_' + n]});
+                aTeamStatsCopy.sort(function(a, b){return a[t + '_' + n] - b[t + '_' + n]});
               }
               aTeamStats.forEach(item => {
                 item.rank[t + '_' + n] = aTeamStatsCopy.findIndex(c => c.id === item.id) + 1;

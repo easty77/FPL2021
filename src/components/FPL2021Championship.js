@@ -16,10 +16,22 @@ const FPL2021Championship = ({teamStatsData}) => {
 
 
 const [rows, setRows] = useState([]);
+const [columns, setColumns] = useState([]);
 const [numMatches, setNumMatches] = useState("0");
 const [matchType, setMatchType] = useState("total");
 
-  useEffect(() => {
+useEffect(() => {
+  console.log('In Championship constructor')
+  
+  // all columns are in the table but some are just not drawn so are invisible (not sure of overhead compared with removing altogether via headers)
+  let aColumns = getChampionshipColumns()
+  aColumns.unshift({"key": "position", "header":"#"})
+
+  setColumns(aColumns)
+
+},[]);
+
+useEffect(() => {
     console.log('In useEffect number')
     
     let aFiltered = teamStatsData[numMatches]
@@ -36,7 +48,7 @@ const [matchType, setMatchType] = useState("total");
 
 	},[teamStatsData, numMatches]);
 
-  const loadTeamStatsData = () => {
+const loadTeamStatsData = () => {
     let retrieveURLs = retrieveURL('team_stats');
   	let aURLs=[]
   	for (var u in retrieveURLs)
@@ -58,15 +70,6 @@ const [matchType, setMatchType] = useState("total");
       setRows(tSD[numMatches])
       });
   };
-  const filterColumns = () => {
-    let aFilterColumns = []
-    let aColumns = getChampionshipColumns()
-    aColumns.forEach(column => {
-      if (column.key === "name" ||  column.key.indexOf(matchType + "_") === 0)
-        aFilterColumns.push(column)
-    })
-    return aFilterColumns
-  }
   const handleMatchTypeChange = event => {
     setMatchType(event.target.value);
   };
@@ -94,7 +97,7 @@ const [matchType, setMatchType] = useState("total");
     }
   }
   const isColumnVisible = (id) => {
-    return id === "name" ||  (id.indexOf(matchType + "_") === 0)
+    return id === "name" ||  id === "position" ||   (id.indexOf(matchType + "_") === 0)
 
   }
 
@@ -127,7 +130,7 @@ return (
             </div>
           </div>
     { teamStatsData !== null && 
-    <DataTable rows={rows} headers={getChampionshipColumns()} isSortable sortRow={customSortRow}>
+    <DataTable rows={rows} headers={columns} isSortable sortRow={customSortRow}>
       {({ rows, headers, getHeaderProps, getRowProps, getTableProps }) => (
         <Table {...getTableProps()} size="compact">
           <TableHead>
@@ -143,10 +146,13 @@ return (
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map(row => (
+            {rows.map((row,index) => (
               <TableRow key={row.id} {...getRowProps({ row })}>
                 {row.cells.map(cell => {
-                  if (isColumnVisible(cell.info.header)) {
+                  if (cell.info.header === 'position') {
+                    return <TableCell key={cell.id}>{index+1}</TableCell>;
+                  }
+                  else if (isColumnVisible(cell.info.header)) {
                     return <TableCell key={cell.id}>{cell.value}</TableCell>;
                   }
                 })}
