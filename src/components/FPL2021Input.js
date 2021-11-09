@@ -369,13 +369,16 @@ const renderReason=(fixture) => {
                     return (
                       <TableCell key={cell.id}>
                         <div className="subtable">
-                          <div className="row">
-                            <span className="cell">{cell.value.home[numMatches].total_league_position}</span>-
-                            <span className="cell">{cell.value[numMatches][matchType].home}</span>
+                          <div className="data_header_row">
+                            <span className="cell">Ch</span><span className="cell">+</span>
                           </div>
-                          <div className="row">
-                            <span className="cell">{cell.value.away[numMatches].total_league_position}</span>-
-                            <span className="cell">{cell.value[numMatches][matchType].away}</span>
+                          <div className="data_row">
+                            <span className="cell rank">{cell.value.home[numMatches].total_league_position}</span>
+                            <span className="cell rank">{cell.value[numMatches][matchType].home}</span>
+                          </div>
+                          <div className="data_row">
+                            <span className="cell rank">{cell.value.away[numMatches].total_league_position}</span>
+                            <span className="cell rank">{cell.value[numMatches][matchType].away}</span>
                           </div>
                         </div>
                       </TableCell>
