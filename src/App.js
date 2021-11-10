@@ -180,6 +180,12 @@ function App()
             "total":(hstats[att].total_matches === 0) ? undefined : {"for": avg(hstats[att].total_ppda,hstats[att].total_matches), "against": avg(hstats[att].total_vppda,hstats[att].total_matches)},
             "ha":(hstats[att].h_matches === 0) ? undefined : {"for": avg(hstats[att].h_ppda,hstats[att].h_matches), "against": avg(hstats[att].h_vppda,hstats[att].h_matches)}
           }
+          // this is a home team so store home attributes as ha  (so can be displayed in ha mode)
+          for (let s in astats[att].rank) {
+            if (s.indexOf("h_") === 0) {
+              hstats[att].rank[s.replace("h_", "ha_")] = hstats[att].rank[s]
+            }
+          }
           row.rank.home[att] = hstats[att].rank
           row.rank.home[att].id = f.team_h
         }
@@ -208,6 +214,12 @@ function App()
           row.ppda.away[att] = {
             "total":(astats[att].total_matches === 0) ? undefined : {"for": avg(astats[att].total_ppda,astats[att].total_matches), "against": avg(astats[att].total_vppda,astats[att].total_matches)},
             "ha":(astats[att].a_matches === 0) ? undefined : {"for": avg(astats[att].h_ppda,astats[att].a_matches), "against": avg(astats[att].a_vppda,astats[att].a_matches)}
+          }
+          // this is a away team so store away attributes as ha  (so can be displayed in ha mode)
+          for (let s in astats[att].rank) {
+            if (s.indexOf("a_") === 0) {
+              astats[att].rank[s.replace("a_", "ha_")] = astats[att].rank[s]
+            }
           }
           row.rank.away[att] = astats[att].rank
           row.rank.away[att].id = f.team_a

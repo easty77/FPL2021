@@ -126,6 +126,44 @@ export const formatDOW = (isoDate, numCols)=>{
     ];
             }
 
+export const getComparisonColumns = ()=>{
+    return [
+        { "key": "name", "header": "Name"},
+        { "key": "total_matches", "header": "#Matches"},
+        { "key": "total_points", "header": "#Pts"},
+        { "key": "total_xpts", "header": "#xPts"},
+        { "key": "total_goals", "header": "#F"},
+        { "key": "total_goals_conceded", "header": "#A"},
+        { "key": "total_xg", "header": "#xF"},
+        { "key": "total_vxg", "header": "#xA"},
+        { "key": "total_shots", "header": "#Shots"},
+        { "key": "total_target", "header": "#On Target"},
+        { "key": "total_deep", "header": "#Deep"},
+        { "key": "total_ppda", "header": "#PPDA"},
+        { "key": "total_vshots", "header": "#Opponent Shots"},
+        { "key": "total_vtarget", "header": "#Opponent On Target"},
+        { "key": "total_vdeep", "header": "#Opponent Deep"},
+        { "key": "total_vppda", "header": "#Opponent PPDA"},
+        { "key": "total_possession", "header": "Possession"},
+        { "key": "ha_matches", "header": "#Matches"},
+        { "key": "ha_points", "header": "#Pts"},
+        { "key": "ha_xpts", "header": "#xPts"},
+        { "key": "ha_goals", "header": "#F"},
+        { "key": "ha_goals_conceded", "header": "#A"},
+        { "key": "ha_xg", "header": "#xF"},
+        { "key": "ha_vxg", "header": "#xA"},
+        { "key": "ha_shots", "header": "#Shots"},
+        { "key": "ha_target", "header": "#On Target"},
+        { "key": "ha_deep", "header": "#Deep"},
+        { "key": "ha_ppda", "header": "#PPDA"},
+        { "key": "ha_vshots", "header": "#Opponent Shots"},
+        { "key": "ha_vtarget", "header": "#Opponent On Target"},
+        { "key": "ha_vdeep", "header": "#Opponent Deep"},
+        { "key": "ha_vppda", "header": "#Opponent PPDA"},
+        { "key": "ha_possession", "header": "Possession"},
+    ];
+    }
+
     export const getFixtureColumns = ()=>{
         return [
             { "key": "event", "header": "Event"},

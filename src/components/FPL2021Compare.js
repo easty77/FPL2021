@@ -8,7 +8,7 @@ import {
     TableBody,
     TableCell,
 } from 'carbon-components-react';
-import {getChampionshipColumns} from '../Utils.js';  
+import {getComparisonColumns} from '../Utils.js';  
 const FPL2021Compare = ({comparisonData, numMatches, matchType}) => {
 
     const [rows, setRows] = useState([]);
@@ -25,7 +25,7 @@ const FPL2021Compare = ({comparisonData, numMatches, matchType}) => {
     
       }
       return (
-        <DataTable rows={rows} headers={getChampionshipColumns()}>
+        <DataTable rows={rows} headers={getComparisonColumns()}>
       {({ rows, headers, getHeaderProps, getRowProps, getTableProps }) => (
         <Table {...getTableProps()} size="compact">
           <TableHead>

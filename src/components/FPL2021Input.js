@@ -336,13 +336,16 @@ const renderReason=(fixture) => {
                       <TableCell key={cell.id}>
                         <div className="subtable">
                           <div className="data_header_row">
-                            <span className="cell">M1</span><span className="cell">R1</span>
+                            {cell.value.m1.h !== undefined && <span className="cell" title={cell.value.m1.date}>M1</span>}
+                            {cell.value.r1.h !== undefined && <span className="cell" title={cell.value.r1.date}>R1</span>}
                           </div>
                           <div className="data_row">
-                            <span className="cell">{cell.value.m1.h}</span><span className="cell">{cell.value.r1.h}</span>
+                            {cell.value.m1.h !== undefined && <span className="cell">{cell.value.m1.h} ({cell.value.m1.hxg})</span>}
+                            {cell.value.r1.h !== undefined && <span className="cell">{cell.value.r1.h} ({cell.value.r1.hxg})</span>}
                           </div>
                           <div className="data_row">
-                            <span className="cell">{cell.value.m1.a}</span><span className="cell">{cell.value.r1.a}</span>
+                          {cell.value.m1.h !== undefined && <span className="cell">{cell.value.m1.a} ({cell.value.m1.axg})</span>}
+                          {cell.value.r1.h !== undefined && <span className="cell">{cell.value.r1.a} ({cell.value.r1.axg})</span>}
                           </div>
                         </div>
                       </TableCell>
