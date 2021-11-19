@@ -332,20 +332,24 @@ const renderReason=(fixture) => {
                     );
                   }
                   else if (cell.info.header === 'previous') {
-                    return (
+                      // reverse r/m for R & R1
+                      return (
                       <TableCell key={cell.id}>
                         <div className="subtable">
                           <div className="data_header_row">
+                            {cell.value.r0.h !== undefined && <span className="cell" title={cell.value.r0.date}>R</span>}
                             {cell.value.m1.h !== undefined && <span className="cell" title={cell.value.m1.date}>M1</span>}
                             {cell.value.r1.h !== undefined && <span className="cell" title={cell.value.r1.date}>R1</span>}
                           </div>
                           <div className="data_row">
+                            {cell.value.r0.h !== undefined && <span className="cell">{cell.value.r0.a} ({cell.value.r0.axg})</span>}
                             {cell.value.m1.h !== undefined && <span className="cell">{cell.value.m1.h} ({cell.value.m1.hxg})</span>}
-                            {cell.value.r1.h !== undefined && <span className="cell">{cell.value.r1.h} ({cell.value.r1.hxg})</span>}
+                            {cell.value.r1.h !== undefined && <span className="cell">{cell.value.r1.a} ({cell.value.r1.axg})</span>}
                           </div>
                           <div className="data_row">
+                          {cell.value.r0.h !== undefined && <span className="cell">{cell.value.r0.h} ({cell.value.r0.hxg})</span>}
                           {cell.value.m1.h !== undefined && <span className="cell">{cell.value.m1.a} ({cell.value.m1.axg})</span>}
-                          {cell.value.r1.h !== undefined && <span className="cell">{cell.value.r1.a} ({cell.value.r1.axg})</span>}
+                          {cell.value.r1.h !== undefined && <span className="cell">{cell.value.r1.h} ({cell.value.r1.hxg})</span>}
                           </div>
                         </div>
                       </TableCell>
