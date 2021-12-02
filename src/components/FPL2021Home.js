@@ -99,7 +99,7 @@ useEffect(() => {
           totalRow[pid].full_display =  totalRow[pid].display + (" (" + totalRow[pid].goals + ")" )
         })
         if (nFinished > 0) {
-          totalRow.score = totalRow.score / nFinished;  // convert total goals to average goals
+          totalRow.score = Math.round(10 * totalRow.score / nFinished)/10;  // convert total goals to average goals
         }
         else{
           totalRow.score = undefined
