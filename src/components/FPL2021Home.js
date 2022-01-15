@@ -92,6 +92,9 @@ useEffect(() => {
         })
         setWeekResults(nFinished > 0)
         aPredictors.forEach(pid => {
+          if (totalRow[pid] === undefined) {
+            totalRow[pid] = {"points": 0, "correct": 0, "H":0, "D":0, "A":0, "goals":0, "count":0}
+          }
           if (totalRow[pid].count > 0) {
             totalRow[pid].goals = totalRow[pid].goals/totalRow[pid].count;  // convert total goals to average goals
           }
