@@ -27,7 +27,7 @@ function App()
       odds: '/FPL2021/data/odds.json',
       sequence: '/FPL2021/data/team_results_sequence_2021.json',
       previous: '/FPL2021/data/team_previous_instances_2021.json',
-      team_stats:{"0":"/FPL2021/data/team_stats_2021.json", "3":"/FPL2021/data/team_last3_stats_2021.json", "5":"/FPL2021/data/team_last5_stats_2021.json"},
+      team_stats:{"0":"/FPL2021/data/team_stats_2021.json", "3":"/FPL2021/data/team_last3_stats_2021.json", "5":"/FPL2021/data/team_last5_stats_2021.json", "10":"/FPL2021/data/team_last10_stats_2021.json"},
       save_predictions:'/FPL2021/data/success.json'
     },
     server: {
@@ -37,7 +37,7 @@ function App()
       odds: '/FPL/servlet/ENEFPLServlet?action=select_matchodds&output=json&year=2021',
       sequence: '/json/fpl/team_results_sequence_2021.json',
       previous: '/json/fpl/team_previous_instances_2021.json',
-      team_stats:{"0":"/json/fpl/team_stats_2021.json", "3":"/json/fpl/team_last3_stats_2021.json", "5":"/json/fpl/team_last5_stats_2021.json"},
+      team_stats:{"0":"/json/fpl/team_stats_2021.json", "3":"/json/fpl/team_last3_stats_2021.json", "5":"/json/fpl/team_last5_stats_2021.json", "10":"/json/fpl/team_last10_stats_2021.json"},
       save_predictions:'/FPL/servlet/ENEFPLServlet?action=save_predictions&output=json&year=2021'
     },
   };
@@ -303,10 +303,15 @@ function App()
 
     // subtract 1 as includes stake 
     let odds = oddsData.find(o => o.fixture_id === fixture_id.toString())
-    let profit = {"value": parseFloat((odds[odds_att] - 1).toFixed(2)),
-              "display": odds["dsp_" + odds_att]};
+    if (odds !== undefined) {
+      let profit = {"value": parseFloat((odds[odds_att] - 1).toFixed(2)),
+      "display": odds["dsp_" + odds_att]};
 
-    return profit;
+      return profit;
+    }
+    else {
+      return {"value": 0.0, "display": ""}
+    }
   }
 
   const loadBaseData = () => {
@@ -544,8 +549,10 @@ function App()
       let nIndex = getResultIndex(next)
       prev[next.event].result[['H', 'D', 'A'][nIndex]]++
       let odds = oddsData.find(o => o.fixture_id === next.id)
-      let resultOddsRank = rankOdds([odds.home, odds.draw, odds.away])[nIndex]
-      prev[next.event].odds[resultOddsRank]++
+      if (odds !== undefined) {
+        let resultOddsRank = rankOdds([odds.home, odds.draw, odds.away])[nIndex]
+        prev[next.event].odds[resultOddsRank]++
+      }
       return prev;
     }, {});
 

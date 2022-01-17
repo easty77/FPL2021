@@ -79,8 +79,8 @@ useEffect(() => {
             f.score = {"h":f.team_h_score, "a":f.team_a_score}
             f.result = ['H', 'D', 'A'][nIndexResult]
             let odds = getOddsByFixture(f.id)
-            let strOddsAttribute = ['dsp_home','dsp_draw', 'dsp_away'][nIndexResult];
-            if (odds[strOddsAttribute] !== undefined) {
+            if (odds !== undefined) {
+              let strOddsAttribute = ['dsp_home','dsp_draw', 'dsp_away'][nIndexResult];
               f.odds = {"value": odds[strOddsAttribute], "rank": odds.rank[nIndexResult],
                 "display": ("H: " + odds.dsp_home + "\nD: " + odds.dsp_draw + "\nA: " + odds.dsp_away)}
             }
