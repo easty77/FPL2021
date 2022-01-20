@@ -117,7 +117,7 @@ useEffect(() => {
         }
         aFiltered.push(totalRow)
         setWeekData (aFiltered)
-    },[weekNumber, predictionsData]);
+    },[weekNumber, predictionsData, fixtureData]);
     
 
   const handleWeekNumberChange = event => {
