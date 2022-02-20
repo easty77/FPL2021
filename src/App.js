@@ -67,7 +67,7 @@ function App()
   const retrieveURL = urlName => {
     return urls[process.env.NODE_ENV === 'development' ? 'mock' : 'server'][
       urlName
-    ];
+    ] + ("&ts=" + (new Date()).getTime());
   };
 
   const getNumCols=()=>{
