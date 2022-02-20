@@ -65,7 +65,17 @@ useEffect(() => {
           if (p.reason !== '')
               nReasonCount++
       })
-      setCanSubmit(numCols < 3 || nReasonCount == inputWeekData.filter(f => canInput(f.date)).length)
+      // no validation of Reason input in Smartphone mode
+      if (!canSubmit) {
+        if (numCols < 3) {
+          setCanSubmit(true)
+        }
+        else {
+          let nInputFixtures = inputWeekData.filter(f => canInput(f.date)).length
+          console.log("Reasons: " + nReasonCount + " Fixtures: " + nInputFixtures)
+          setCanSubmit(nReasonCount >= nInputFixtures)
+        }
+      }
     }
 },[predictionsData, numCols, inputWeekData]);
 

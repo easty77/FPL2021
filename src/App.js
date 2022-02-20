@@ -65,9 +65,18 @@ function App()
   const [inputWeekData, setInputWeekData] = useState(null);
 
   const retrieveURL = urlName => {
-    return urls[process.env.NODE_ENV === 'development' ? 'mock' : 'server'][
+    let ts = (new Date()).getTime()
+    let url = urls[process.env.NODE_ENV === 'development' ? 'mock' : 'server'][
       urlName
-    ] + ("&ts=" + (new Date()).getTime());
+    ];
+    if (typeof url === "object") {
+      Object.keys(url).forEach(u => url[u] = url[u] + ((url[u].indexOf('?') >= 0) ? '&' : '?') + ("ts=" + ts))
+    }
+    else {
+      url += ((url.indexOf('?') >= 0) ? '&' : '?') + ("ts=" + ts)
+    }
+
+    return url
   };
 
   const getNumCols=()=>{
