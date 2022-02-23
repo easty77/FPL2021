@@ -123,7 +123,7 @@ const renderSequence=(cell) => {
 const renderSequenceElement=(sequence) => {
   let aFixtures = sequence.fixtures.split("-")
   // JSON.stringify(getFixture(aFixtures[index]))
-  return sequence.results.substring(0,10).split("").map((r,index) => <span title={displayFixture(getFixture(aFixtures[index]), numCols)}>{r}</span>)
+  return sequence.results.substring(-10).split("").map((r,index) => <span title={displayFixture(getFixture(aFixtures[index]), numCols)}>{r}</span>)
 }
 const renderPrediction=(fixture) => {
   let team_h_score = 0
