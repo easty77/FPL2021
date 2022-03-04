@@ -123,7 +123,10 @@ const renderSequence=(cell) => {
 const renderSequenceElement=(sequence) => {
   let aFixtures = sequence.fixtures.split("-")
   // JSON.stringify(getFixture(aFixtures[index]))
-  return sequence.results.slice(-10).split("").map((r,index) => <span title={displayFixture(getFixture(aFixtures[index]), numCols)}>{r}</span>)
+  let nMaxLength = 10
+  if (numMatches !== 0)
+    nMaxLength = numMatches
+  return sequence.results.slice(-nMaxLength).split("").map((r,index) => <span title={displayFixture(getFixture(aFixtures[index]), numCols)}>{r}</span>)
 }
 const renderPrediction=(fixture) => {
   let team_h_score = 0
@@ -199,6 +202,7 @@ const renderReason=(fixture) => {
                     <SelectItem value="0" text="All" />
                     <SelectItem value="3" text="Three" />
                     <SelectItem value="5" text="Five" />
+                    <SelectItem value="10" text="Ten" />
                     </Select>
                 </div>
             </div>
