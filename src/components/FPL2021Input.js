@@ -123,7 +123,7 @@ const renderSequence=(cell) => {
 const renderSequenceElement=(sequence) => {
   let aFixtures = sequence.fixtures.split("-")
   // JSON.stringify(getFixture(aFixtures[index]))
-  return sequence.results.substring(-10).split("").map((r,index) => <span title={displayFixture(getFixture(aFixtures[index]), numCols)}>{r}</span>)
+  return sequence.results.slice(-10).split("").map((r,index) => <span title={displayFixture(getFixture(aFixtures[index]), numCols)}>{r}</span>)
 }
 const renderPrediction=(fixture) => {
   let team_h_score = 0
@@ -152,7 +152,7 @@ const renderPrediction=(fixture) => {
   );
 }
 const renderReason=(fixture) => {
-  let reason="Preiction not found"
+  let reason="Prediction not found"
   let prediction = predictionsData.find(p => p.fixture_id === parseInt(fixture.id, 10))
   if (prediction !== undefined) {
     reason = prediction.reason
