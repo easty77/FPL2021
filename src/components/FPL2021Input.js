@@ -65,7 +65,17 @@ useEffect(() => {
           if (p.reason !== '')
               nReasonCount++
       })
-      setCanSubmit(numCols < 3 || nReasonCount == inputWeekData.filter(f => canInput(f.date)).length)
+      // no validation of Reason input in Smartphone mode
+      if (!canSubmit) {
+        if (numCols < 3) {
+          setCanSubmit(true)
+        }
+        else {
+          let nInputFixtures = inputWeekData.filter(f => canInput(f.date)).length
+          console.log("Reasons: " + nReasonCount + " Fixtures: " + nInputFixtures)
+          setCanSubmit(nReasonCount >= nInputFixtures)
+        }
+      }
     }
 },[predictionsData, numCols, inputWeekData]);
 
@@ -113,29 +123,45 @@ const renderSequence=(cell) => {
 const renderSequenceElement=(sequence) => {
   let aFixtures = sequence.fixtures.split("-")
   // JSON.stringify(getFixture(aFixtures[index]))
-  return sequence.results.split("").map((r,index) => <span title={displayFixture(getFixture(aFixtures[index]), numCols)}>{r}</span>)
+  return sequence.results.substring(-10).split("").map((r,index) => <span title={displayFixture(getFixture(aFixtures[index]), numCols)}>{r}</span>)
 }
 const renderPrediction=(fixture) => {
+  let team_h_score = 0
+  let team_a_score = 0
   let prediction = predictionsData.find(p => p.fixture_id === parseInt(fixture.id, 10))
+  if (prediction !== undefined) {
+    team_h_score = prediction.team_h_score
+    team_a_score = prediction.team_a_score
+  }
+  else {
+    console.log("Prediction for " + fixture.id + " not found")  // shouldn't happen
+  }
   return (
       <div className="subtable">
           <div className="entry_row">
               <span className="cell">
-                  <NumberInput required="" id={fixture.id + ".team_h_score"} min={0} max={9} value={prediction.team_h_score} size="sm" isMobile={numCols < 3} readOnly={!canInput(fixture.kickoff_time)} onChange={handleNumberChange} />
+                  <NumberInput required="" id={fixture.id + ".team_h_score"} min={0} max={9} value={team_h_score} size="sm" isMobile={numCols < 3} readOnly={!canInput(fixture.kickoff_time)} onChange={handleNumberChange} />
               </span>
           </div>
           <div className="entry_row">
               <span className="cell">
-                  <NumberInput required="" id={fixture.id + ".team_a_score"} min={0} max={9} value={prediction.team_a_score} size="sm" isMobile={numCols < 3} readOnly={!canInput(fixture.kickoff_time)} onChange={handleNumberChange} />
+                  <NumberInput required="" id={fixture.id + ".team_a_score"} min={0} max={9} value={team_a_score} size="sm" isMobile={numCols < 3} readOnly={!canInput(fixture.kickoff_time)} onChange={handleNumberChange} />
               </span>
           </div>
       </div>
   );
 }
 const renderReason=(fixture) => {
+  let reason="Preiction not found"
   let prediction = predictionsData.find(p => p.fixture_id === parseInt(fixture.id, 10))
+  if (prediction !== undefined) {
+    reason = prediction.reason
+  }
+  else {
+    console.log("Prediction for " + fixture.id + " not found")  // shouldn't happen
+  }
   return (
-  <TextInput required="" id={fixture.id + ".reason"} labelText="reason" hideLabel={true} maxLength="128" width="40" value={prediction.reason} readOnly={!canInput(fixture.kickoff_time)} onChange={handleChange} />
+  <TextInput required="" id={fixture.id + ".reason"} labelText="reason" hideLabel={true} maxLength="128" width="40" value={reason} readOnly={!canInput(fixture.kickoff_time)} onChange={handleChange} />
   );
 }
   return (

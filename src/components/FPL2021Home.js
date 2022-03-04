@@ -79,8 +79,14 @@ useEffect(() => {
             f.score = {"h":f.team_h_score, "a":f.team_a_score}
             f.result = ['H', 'D', 'A'][nIndexResult]
             let odds = getOddsByFixture(f.id)
-            f.odds = {"value": odds[['dsp_home','dsp_draw', 'dsp_away'][nIndexResult]], "rank": odds.rank[nIndexResult],
+            if (odds !== undefined) {
+              let strOddsAttribute = ['dsp_home','dsp_draw', 'dsp_away'][nIndexResult];
+              f.odds = {"value": odds[strOddsAttribute], "rank": odds.rank[nIndexResult],
                 "display": ("H: " + odds.dsp_home + "\nD: " + odds.dsp_draw + "\nA: " + odds.dsp_away)}
+            }
+            else {
+              f.odds={"value":"", "odds":"", "display":""};   // no odds info available
+            }
             totalRow.score += (f.score.h + f.score.a)
             totalRow.result[f.result] += 1
             totalRow.odds['F' + f.odds.rank] += 1    
@@ -111,7 +117,7 @@ useEffect(() => {
         }
         aFiltered.push(totalRow)
         setWeekData (aFiltered)
-    },[weekNumber, predictionsData]);
+    },[weekNumber, predictionsData, fixtureData]);
     
 
   const handleWeekNumberChange = event => {
