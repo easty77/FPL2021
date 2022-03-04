@@ -111,10 +111,10 @@ const renderSequence=(cell) => {
   <TableCell key={cell.id}>
   <div className="subtable">
     <div className="row">
-      <span className="cell">{renderSequenceElement(cell.value.home[matchType])}</span>
+      <span className="sequence">{renderSequenceElement(cell.value.home[matchType])}</span>
     </div>
     <div className="row">
-      <span className="cell">{renderSequenceElement(cell.value.away[matchType])}</span>
+      <span className="sequence">{renderSequenceElement(cell.value.away[matchType])}</span>
     </div>
   </div>
 </TableCell>
@@ -124,7 +124,7 @@ const renderSequenceElement=(sequence) => {
   let aFixtures = sequence.fixtures.split("-")
   // JSON.stringify(getFixture(aFixtures[index]))
   let nMaxLength = 10
-  if (numMatches !== 0)
+  if (numMatches !== "0")
     nMaxLength = numMatches
   return sequence.results.slice(-nMaxLength).split("").map((r,index) => <span title={displayFixture(getFixture(aFixtures[index]), numCols)}>{r}</span>)
 }
@@ -142,7 +142,7 @@ const renderPrediction=(fixture) => {
   return (
       <div className="subtable">
           <div className="entry_row">
-              <span className="cell">
+              <span className="sequence">
                   <NumberInput required="" id={fixture.id + ".team_h_score"} min={0} max={9} value={team_h_score} size="sm" isMobile={numCols < 3} readOnly={!canInput(fixture.kickoff_time)} onChange={handleNumberChange} />
               </span>
           </div>
