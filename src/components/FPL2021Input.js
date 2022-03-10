@@ -126,7 +126,10 @@ const renderSequenceElement=(sequence) => {
   let nMaxLength = 10
   if (numMatches !== "0")
     nMaxLength = numMatches
-  return sequence.results.slice(-nMaxLength).split("").map((r,index) => <span title={displayFixture(getFixture(aFixtures[index]), numCols)}>{r}</span>)
+  let nOffset = 0
+  if (sequence.results.length > nMaxLength)
+    nOffset =  sequence.results.length - nMaxLength 
+  return sequence.results.slice(-nMaxLength).split("").map((r,index) => <span title={displayFixture(getFixture(aFixtures[index+nOffset]), numCols)}>{r}</span>)
 }
 const renderPrediction=(fixture) => {
   let team_h_score = 0

@@ -259,7 +259,7 @@ function App()
     })
     setInputWeekData(aRows)
   }
-  },[fixtureData, weekNumber]);
+  },[fixtureData, oddsData, previousInstanceData, resultsSequenceData, teamsData, weekNumber]);
 
   const getTeam=( id )=>{
     let team = teamsData.find(t => t.id === id.toString())
