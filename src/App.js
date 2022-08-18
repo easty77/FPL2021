@@ -31,14 +31,14 @@ function App()
       save_predictions:'/FPL2021/data/success.json'
     },
     server: {
-      bootstrap: '/fpl/json/2021/bootstrap-static.json',
-      fixtures: '/fpl/json/2021/fixtures.json',
-      predictions: '/FPL/servlet/ENEFPLServlet?action=select_predictions&output=json&year=2021',
-      odds: '/FPL/servlet/ENEFPLServlet?action=select_matchodds&output=json&year=2021',
-      sequence: '/json/fpl/team_results_sequence_2021.json',
-      previous: '/json/fpl/team_previous_instances_2021.json',
-      team_stats:{"0":"/json/fpl/team_stats_2021.json", "3":"/json/fpl/team_last3_stats_2021.json", "5":"/json/fpl/team_last5_stats_2021.json", "10":"/json/fpl/team_last10_stats_2021.json"},
-      save_predictions:'/FPL/servlet/ENEFPLServlet?action=save_predictions&output=json&year=2021'
+      bootstrap: '/fpl/json/2022/bootstrap-static.json',
+      fixtures: '/fpl/json/2022/fixtures.json',
+      predictions: '/FPL/servlet/ENEFPLServlet?action=select_predictions&output=json&year=2022',
+      odds: '/FPL/servlet/ENEFPLServlet?action=select_matchodds&output=json&year=2022',
+      sequence: '/fpl/json/2022/team_results_sequence.json',
+      previous: '/fpl/json/2022/team_previous_instances.json',
+      team_stats:{"0":"/fpl/json/2022/team_stats.json", "3":"/fpl/json/2022/team_last3_stats.json", "5":"/fpl/json/2022/team_last5_stats.json", "10":"/fpl/json/2022/team_last10_stats.json"},
+      save_predictions:'/FPL/servlet/ENEFPLServlet?action=save_predictions&output=json&year=2022'
     },
   };
 
