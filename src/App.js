@@ -25,9 +25,9 @@ function App()
       fixtures: '/FPL2021/data/fixtures.json',
       predictions: '/FPL2021/data/predictions.json',
       odds: '/FPL2021/data/odds.json',
-      sequence: '/FPL2021/data/team_results_sequence_2021.json',
-      previous: '/FPL2021/data/team_previous_instances_2021.json',
-      team_stats:{"0":"/FPL2021/data/team_stats_2021.json", "3":"/FPL2021/data/team_last3_stats_2021.json", "5":"/FPL2021/data/team_last5_stats_2021.json", "10":"/FPL2021/data/team_last10_stats_2021.json"},
+      sequence: '/FPL2021/data/team_results_sequence.json',
+      previous: '/FPL2021/data/team_previous_instances.json',
+      team_stats:{"0":"/FPL2021/data/team_stats.json", "3":"/FPL2021/data/team_last3_stats.json", "5":"/FPL2021/data/team_last5_stats.json", "10":"/FPL2021/data/team_last10_stats.json"},
       save_predictions:'/FPL2021/data/success.json'
     },
     server: {
@@ -358,7 +358,9 @@ function App()
       // first event with unfinished matches
       let nEventInput = 0
       let nEvent=1
-      while (aFixtures.findIndex(f => f.event === nEvent) >= 0) {
+      let nMaxEvent = aFixtures.reduce((max,f) => Math.max(max,f.event), aFixtures[0].event);
+      //while (aFixtures.findIndex(f => f.event === nEvent) >= 0) {
+      while ( nEvent <= nMaxEvent) {
           let eventFixtures = aFixtures.filter(f => f.event === nEvent)
           eventFixtures.forEach(f => {
             let hteam = aTeams.find(t => t.id === f.team_h.toString())
